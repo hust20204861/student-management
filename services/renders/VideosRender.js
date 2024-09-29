@@ -1,12 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {  View, TouchableWithoutFeedback, Dimensions, Text } from 'react-native';
+import React, { useState } from 'react';
+import {  View, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import Video from 'react-native-video';
 import styles from '../../styles/style';
 
-export const VideosRender = () => {
-    const item = require('../../assets/domdom.mp4')
-    
-console.log(item,"hh")
+export const VideosRender = ({item}) => {
     //chuyển đổi mode khi màn hình nhỏ và lớn
     // const [isFullScreen, setIsFullScreen] = useState(false);
     // const toggleFullScreen = () => {
@@ -19,7 +16,7 @@ const renderByCount = () => {
             <View style={styles.renderVideo}>
             <TouchableWithoutFeedback>
             <Video
-              source={item}
+              source={item[0].original.url}
               style={styles.video}
             //   resizeMode={!isFullScreen ? 'contain' : 'contain'}
               resizeMode='contain'

@@ -5,11 +5,11 @@ const StudentProfile = ({ route }) => {
   const data = route.params.data
   return (
       <View >
-          <Text style={styles.homeTitle}>Thông tin học sinh</Text>
+          {/* <Text style={styles.homeTitle}>Thông tin học sinh</Text>
           <Text>Tên Học sinh:{data.name}</Text>
           <Text>Lớp:{data.class}</Text>
           <Text>Điểm:{data.grade}</Text>
-          <Text>ID:{data.id}</Text>
+          <Text>ID:{data.id}</Text> */}
       </View> 
       
   );
