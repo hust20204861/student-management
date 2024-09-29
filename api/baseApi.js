@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = 'https://beta.edulive.net/api/school/v1/parent';
+const BASE_URL = 'https://beta.edulive.net';
 const fetchApi = async(url,method='GET', body=null ) => {
     const accessToken = await  AsyncStorage.getItem('accessToken');
   const headers = {

@@ -1,9 +1,7 @@
-import { View, Text, Button, TextInput, TouchableOpacity } from "react-native";
+import { View, Text,TextInput, TouchableOpacity } from "react-native";
+import { useState } from "react";
 import styles from "../../styles/style";
-import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { fakeLogin, getDataWithToken } from "../../api/fetchAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Login } from "../../api/fetchAPI";
 
 const LoginScreen = ({ navigation }) => {
@@ -13,10 +11,10 @@ const LoginScreen = ({ navigation }) => {
   const [errorMessage, setErrorMessage] =useState("")
 
   const handleLogin = async() => {
-    const data = await Login({email, password});
+    const data = await Login({email:"parent_pp1@el-school.net", password:"123456"});
     if(data.code == 200){
-        setErrorMessage(null)
-        navigation.replace("Main")
+        navigation.navigate("HocSinh");
+        setErrorMessage(null);
     }
     if(data.code != 200){
         if(data.errors){

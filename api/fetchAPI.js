@@ -214,17 +214,7 @@ const dataPublic = [
     description: "Hình ảnh mô tả sản phẩm mới ra mắt.", // Mô tả về hình ảnh
     uploadedBy: "admin", // Người tải lên
   },
-  // {
-  //   id: 27,
-  //   type: "video",
-  //   content: [
-  //     require('../../assets/domdom.mp4'),
-  //     require('../../assets/domdom1.mp4')
-  
-  //   ],
-  //   description: "Hình ảnh mô tả sản phẩm mới ra mắt.",
-  //   uploadedBy: "admin",
-  // },
+
 ];
 
 const dataPrivate = [
@@ -303,11 +293,9 @@ export const getPublicActions = () => {
 
 import { fetchApi } from "./baseApi";
 
-
 export const Login = async ({email, password}) => {
-
   try{
-    const response = await fetchApi('/login', 'POST', {email, password});
+    const response = await fetchApi('/api/school/v1/parent/login', 'POST', {email, password});
     if(!response.ok){
       throw new Error('Login faild');
     }
@@ -318,11 +306,45 @@ export const Login = async ({email, password}) => {
     }
     return data;
 }catch(error){
-  console.log(error,"errr")
   console.error('Login error:', error.message);
   throw error; 
 };
 }
 
 
+export const getActions = async (id, type, search = null) => {
+  try{
+    let url = `/api/school/v1/parent/contacts/${id}`;
+    const params = new URLSearchParams();
+    if (type) {
+      params.append('type', type); 
+    }
+    if (search) {
+      params.append('search', search);
+    }
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    const response = await fetchApi(url);
+    if(!response.ok){
+      throw new Error('Get Data Failed');
+    }
+    const data = await response.json();
+    return data;
+  }catch(error){
+    console.error(error.message)
+    throw error;
+  }
+}
+
+export const getList = async () => {
+  try{
+    const response = await fetchApi("/api/school/v1/parent/classes")
+    const data = await response.json();
+    return data;
+  }catch(error){
+    Alert.alert(error.message)
+    throw error;
+  }
+}
 

@@ -1,15 +1,14 @@
 import React from "react";
-import { Image, View, StyleSheet, TouchableOpacity, ScrollView, Text, Modal, Dimensions } from "react-native";
+import { Image, View, TouchableOpacity, ScrollView, Text, Modal, Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import styles from "../../styles/style";
-
 
 export const ImagesRender = ({item}) => {
         const [imageOrientation, setImageOrientation] = useState({ isHorizontal: false, isVertical: false, isSquare: false });
         useEffect(() => {
             if (Array.isArray(item) && item.length > 0) {
                 Image.getSize(
-                    item[0],
+                    item[0].small.url,
                     (width, height) => {
                         const isHorizontal = width > height;
                         const isVertical = height > width;
@@ -23,11 +22,7 @@ export const ImagesRender = ({item}) => {
                 );
             }
         }, [item]);
-
-
-
         
-
         const [isFullScreen, setFullScreen] = useState(false);
         const [currentImageIndex, setCurrentImageIndex] = useState(0); 
         const scrollViewRef = useRef(null);
@@ -88,7 +83,7 @@ export const ImagesRender = ({item}) => {
             case 1:
                 return (
                         <TouchableOpacity style={styles.singleImage} onPress={() => handleImagePress(0)}>
-                            <Image source={{ uri: item[0] }} style={styles.image} />
+                            <Image source={{ uri: item[0].small.url }} style={styles.image} />
                         </TouchableOpacity>
                 );
             case 2:
@@ -97,30 +92,30 @@ export const ImagesRender = ({item}) => {
                         {imageOrientation.isHorizontal && (
                             <View style={{flexDirection: 'colum',}}>
                                 <TouchableOpacity style={styles.twoimageHorizontal0} onPress={() => handleImagePress(0)}>
-                                    <Image source={{ uri: item[0] }}  style={styles.image}/>
+                                    <Image source={{ uri: item[0].small.url }}  style={styles.image}/>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.twoimageHorizontal} onPress={() => handleImagePress(1)}>
-                                    <Image source={{ uri: item[1] }} style={styles.image} />
+                                    <Image source={{ uri: item[1].small.url }} style={styles.image} />
                                 </TouchableOpacity>
                             </View>
                         )}
                         {imageOrientation.isVertical && (
                             <View style={{flexDirection: 'row', justifyContent:"space-between"}}>
                                 <TouchableOpacity style={styles.twoimageVertical0} onPress={() => handleImagePress(0)}>
-                                    <Image source={{ uri: item[0] }} style={styles.image} />
+                                    <Image source={{ uri: item[0].small.url }} style={styles.image} />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.twoimageVertical} onPress={() => handleImagePress(1)}>
-                                    <Image source={{ uri: item[1] }} style={styles.image}/>
+                                    <Image source={{ uri: item[1].small.url }} style={styles.image}/>
                                 </TouchableOpacity>
                             </View>
                         )}
                         {imageOrientation.isSquare && (
                             <View style={{flexDirection:'row', justifyContent:"space-between"}}>
                                 <TouchableOpacity style={styles.twoimageSquare0} onPress={() => handleImagePress(0)}>
-                                    <Image source={{ uri: item[0] }} style={styles.image} />
+                                    <Image source={{ uri: item[0].small.url }} style={styles.image} />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.twoimageSquare} onPress={() => handleImagePress(1)}>
-                                    <Image source={{ uri: item[1] }} style={styles.image} />
+                                    <Image source={{ uri: item[1].small.url }} style={styles.image} />
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -132,14 +127,14 @@ export const ImagesRender = ({item}) => {
                     {imageOrientation.isHorizontal && (
                         <View >
                             <TouchableOpacity style={styles.threeimageHorizontal0} onPress={() => handleImagePress(0)}>
-                                <Image source={{ uri: item[0] }} style={styles.image} />
+                                <Image source={{ uri: item[0].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <View style={{flexDirection:'row', justifyContent:"space-between"}}>
                             <TouchableOpacity style={styles.threeimageHorizontal} onPress={() => handleImagePress(1)}>
-                                <Image source={{ uri: item[1] }} style={styles.image} />
+                                <Image source={{ uri: item[1].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.threeimageHorizontal} onPress={() => handleImagePress(2)}>
-                                <Image source={{ uri: item[2] }} style={styles.image} />
+                                <Image source={{ uri: item[2].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             </View>
                         </View>
@@ -147,14 +142,14 @@ export const ImagesRender = ({item}) => {
                     {imageOrientation.isVertical && (
                         <View  style={{flexDirection:'row'}}>
                             <TouchableOpacity  style={styles.threeimageVertical0} onPress={() => handleImagePress(0)}>
-                                <Image source={{ uri: item[0] }} style={styles.image} />
+                                <Image source={{ uri: item[0].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <View style={{flexDirection:'colum'}}>
                             <TouchableOpacity style={styles.threeimageVertical} onPress={() => handleImagePress(1)}>
-                                <Image source={{ uri: item[1] }}  style={styles.image}/>
+                                <Image source={{ uri: item[1].small.url }}  style={styles.image}/>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.threeimageVertical} onPress={() => handleImagePress(2)}>
-                                <Image source={{ uri: item[2] }} style={styles.image} />
+                                <Image source={{ uri: item[2].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             </View>
                         </View>
@@ -162,13 +157,13 @@ export const ImagesRender = ({item}) => {
                     {imageOrientation.isSquare && (
                         <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                             <TouchableOpacity style={styles.threeimageSquare0} onPress={() => handleImagePress(0)}>
-                                <Image source={{ uri: item[0] }} style={styles.image} />
+                                <Image source={{ uri: item[0].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity  style={styles.threeimageSquare} onPress={() => handleImagePress(1)}>
-                                <Image source={{ uri: item[1] }} style={styles.image}/>
+                                <Image source={{ uri: item[1].small.url }} style={styles.image}/>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.threeimageSquare} onPress={() => handleImagePress(2)}>
-                                <Image source={{ uri: item[2] }}  style={styles.image}/>
+                                <Image source={{ uri: item[2].small.url }}  style={styles.image}/>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -180,17 +175,17 @@ export const ImagesRender = ({item}) => {
                     {imageOrientation.isHorizontal && (
                         <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                             <TouchableOpacity style={styles.fourimageHorizontal0} onPress={() => handleImagePress(0)}>
-                                <Image source={{ uri: item[0] }}  style={styles.image}/>
+                                <Image source={{ uri: item[0].small.url }}  style={styles.image}/>
                             </TouchableOpacity>
                             <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                             <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(1)}>
-                                <Image source={{ uri: item[1] }}  style={styles.image} />
+                                <Image source={{ uri: item[1].small.url }}  style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(2)}>
-                                <Image source={{ uri: item[2] }}   style={styles.image}/>
+                                <Image source={{ uri: item[2].small.url }}   style={styles.image}/>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(3)}>
-                                <Image source={{ uri: item[3] }}  style={styles.image} />
+                                <Image source={{ uri: item[3].small.url }}  style={styles.image} />
                             </TouchableOpacity>
                             </View>
                         </View>
@@ -198,17 +193,17 @@ export const ImagesRender = ({item}) => {
                     {imageOrientation.isVertical && (
                         <View style={{flexDirection:'row'}}>
                             <TouchableOpacity style={styles.fourimageVertical0} onPress={() => handleImagePress(0)}>
-                                <Image source={{ uri: item[0] }} style={styles.image} />
+                                <Image source={{ uri: item[0].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                             <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(1)}>
-                                <Image source={{ uri: item[1] }} style={styles.image} />
+                                <Image source={{ uri: item[1].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(2)}>
-                                <Image source={{ uri: item[2] }} style={styles.image} />
+                                <Image source={{ uri: item[2].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(3)}>
-                                <Image source={{ uri: item[3] }} style={styles.image} />
+                                <Image source={{ uri: item[3].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             </View>
                         </View>
@@ -216,16 +211,16 @@ export const ImagesRender = ({item}) => {
                     {imageOrientation.isSquare && (
                         <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                             <TouchableOpacity style={styles.fourimageSquare0} onPress={() => handleImagePress(0)}>
-                                <Image source={{ uri: item[0] }} style={styles.image} />
+                                <Image source={{ uri: item[0].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(1)}>
-                                <Image source={{ uri: item[1] }} style={styles.image}/>
+                                <Image source={{ uri: item[1].small.url }} style={styles.image}/>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(2)}>
-                                <Image source={{ uri: item[2] }} style={styles.image} />
+                                <Image source={{ uri: item[2].small.url }} style={styles.image} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(3)}>
-                                <Image source={{ uri: item[3] }}  style={styles.image}/>
+                                <Image source={{ uri: item[3].small.url }}  style={styles.image}/>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -236,17 +231,17 @@ export const ImagesRender = ({item}) => {
                 {imageOrientation.isHorizontal && (
                     <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                         <TouchableOpacity style={styles.fourimageHorizontal0} onPress={() => handleImagePress(0)}>
-                            <Image source={{ uri: item[0] }}  style={styles.image}/>
+                            <Image source={{ uri: item[0].small.url }}  style={styles.image}/>
                         </TouchableOpacity>
                         <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                         <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(1)}>
-                            <Image source={{ uri: item[1] }}  style={styles.image} />
+                            <Image source={{ uri: item[1].small.url }}  style={styles.image} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(2)}>
-                            <Image source={{ uri: item[2] }}   style={styles.image}/>
+                            <Image source={{ uri: item[2].small.url }}   style={styles.image}/>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(3)}>
-                            <Image source={{ uri: item[3] }}  style={styles.image}/>
+                            <Image source={{ uri: item[3].small.url }}  style={styles.image}/>
                             <View style={styles.overlay}>
                                 <Text style={styles.remainingText}>
                                             +{item.length - 4}
@@ -259,17 +254,17 @@ export const ImagesRender = ({item}) => {
                 {imageOrientation.isVertical && (
                     <View style={{flexDirection:'row'}}>
                         <TouchableOpacity style={styles.fourimageVertical0} onPress={() => handleImagePress(0)}>
-                            <Image source={{ uri: item[0] }} style={styles.image} />
+                            <Image source={{ uri: item[0].small.url }} style={styles.image} />
                         </TouchableOpacity>
                         <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                         <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(1)}>
-                            <Image source={{ uri: item[1] }} style={styles.image} />
+                            <Image source={{ uri: item[1].small.url }} style={styles.image} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(2)}>
-                            <Image source={{ uri: item[2] }} style={styles.image} />
+                            <Image source={{ uri: item[2].small.url }} style={styles.image} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(3)}>
-                            <Image source={{ uri: item[3] }}  style={styles.image}/>
+                            <Image source={{ uri: item[3].small.url }}  style={styles.image}/>
                             <View style={styles.overlay}>
                                 <Text style={styles.remainingText}>
                                          +{item.length - 4}
@@ -283,16 +278,16 @@ export const ImagesRender = ({item}) => {
                 {imageOrientation.isSquare && (
                     <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                         <TouchableOpacity style={styles.fourimageSquare0} onPress={() => handleImagePress(0)}>
-                            <Image source={{ uri: item[0] }} style={styles.image} />
+                            <Image source={{ uri: item[0].small.url }} style={styles.image} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(1)}>
-                            <Image source={{ uri: item[1] }} style={styles.image}/>
+                            <Image source={{ uri: item[1].small.url }} style={styles.image}/>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(2)}>
-                            <Image source={{ uri: item[2] }} style={styles.image} />
+                            <Image source={{ uri: item[2].small.url }} style={styles.image} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(3)}>
-                            <Image source={{ uri: item[3] }}  style={styles.image}/>
+                            <Image source={{ uri: item[3].small.url }}  style={styles.image}/>
                             <View style={styles.overlay}>
                                 <Text style={styles.remainingText}>
                                           +{item.length - 4}
@@ -324,11 +319,11 @@ export const ImagesRender = ({item}) => {
                     showsHorizontalScrollIndicator={false} 
                     contentOffset={{ x: currentImageIndex * Dimensions.get('window').width }}>
                         {isArray ? (
-                            item.map((uri, index) => (
+                            item.map((img, index) => (
                                 <View key={index} style={styles.fullScreenImageContainer}>
 
                                 <TouchableOpacity  onPress={handleModalClose}>
-                                    <Image source={{ uri }} style={[styles.fullScreenImage,]} />
+                                    <Image source={{ uri: img.large.url }} style={[styles.fullScreenImage,]} />
                                 </TouchableOpacity>
 
                 {currentImageIndex > 0 && (
@@ -345,7 +340,7 @@ export const ImagesRender = ({item}) => {
                             ))
                         ) : (
                             <TouchableOpacity onPress={handleModalClose}>
-                                <Image source={{ uri: item }} style={styles.fullScreenImage} />
+                                <Image source={{ uri: item.large.url }} style={styles.fullScreenImage} />
                             </TouchableOpacity>
                         )}
                     </ScrollView>
