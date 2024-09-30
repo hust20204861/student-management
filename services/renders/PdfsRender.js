@@ -75,7 +75,7 @@ const PdfsRender = ({item}) => {
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.attachmentContainer} onPress={handlePress}>
-                 <Icon name="file-pdf-o" size={24} />
+                 <Icon name="file-pdf-o" size={30} />
                  <Text style={styles.fileName}>{item[0].original_name}</Text>
              </TouchableOpacity>
 
@@ -128,13 +128,14 @@ const styles = StyleSheet.create({
     attachmentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
+        padding: 5,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
     },
     fileName: {
         marginLeft: 10,
         fontSize: 16,
+        color:"black",
     },
     closeButton: {
         position: 'absolute',

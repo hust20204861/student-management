@@ -27,7 +27,7 @@ const PublicActions = ({route}) => {
       Data.forEach(item => {
         //  setTimeout(() => {
           setLoadingStates(prevLoadingStates => ({...prevLoadingStates,[item.Id]: false }));
-        //  },5000)
+        //  },3000)
       });
     } catch (error) {
       console.log("Failed to get data:", error);
@@ -35,9 +35,9 @@ const PublicActions = ({route}) => {
       setRefreshing(false);
     }
     };
-    useEffect(() => {
-      console.log("Loading public:", loadingStates);
-    }, [loadingStates]);
+    // useEffect(() => {
+    //   console.log("Loading public:", loadingStates);
+    // }, [loadingStates]);
 
     useEffect(() => {
       fetchData();
@@ -45,7 +45,6 @@ const PublicActions = ({route}) => {
 
   return(
     <View >
-      
        <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={fetchData}/>
     </View>
    

@@ -231,7 +231,7 @@ fullScreenVideo: {
     height: '100%',
 },
 renderVideo: {
-    width: 300,  
+    width:Dimensions.get('window').width,  
     height: 170,
     margin:5
 },
@@ -240,18 +240,23 @@ video: {
     width: '100%',  
     height: '100%', 
     borderRadius: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)'
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    resizeMode:'contain',
+
   },
 
 
 //loading container
 actionsContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
     backgroundColor: '#fff',
-    borderRadius: 8,
     overflow: 'hidden',
     elevation: 5,
-}
+},
+hiddenImage: {
+    width: 0,
+    height: 0, 
+  },
 
   });
 

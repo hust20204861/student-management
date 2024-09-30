@@ -16,7 +16,7 @@ const renderByCount = () => {
             <View style={styles.renderVideo}>
             <TouchableWithoutFeedback>
             <Video
-              source={item[0].original.url}
+              source={{uri: item[0].original.url}}
               style={styles.video}
             //   resizeMode={!isFullScreen ? 'contain' : 'contain'}
               resizeMode='contain'
