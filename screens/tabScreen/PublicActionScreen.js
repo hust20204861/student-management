@@ -11,30 +11,38 @@ const PublicActions = ({route}) => {
   const [refreshing, setRefreshing] = useState(false)
   const id = route.params.data;
   const type = 1;
-
   const fetchData = async () => {
-    setRefreshing(true)
-    try {
-      const response = await getActions(id, type);
-      const Data = await response.data.data
-      setData(Data);
+    setRefreshing(true);
+    let allData = []; 
+    let currentPage = 1; 
+    let totalPages = 1; 
 
-      //tạo đối tượng init với mỗi thuộc tính là trạng thái của từng phần tử trong getData
+    try {
+      while (currentPage <= totalPages) {
+        const response = await getActions(id, type, null, currentPage);
+        const pageData = response.data.data;
+        totalPages = response.data.last_page; 
+        allData = [...allData, ...pageData]; // Kết hợp dữ liệu từ trang mới vào mảng
+        currentPage++; 
+      }
+      setData(allData); 
+
+      // Khởi tạo trạng thái loading cho tất cả các phần tử
       const initLoadingState = {};
-      Data.forEach(item => { initLoadingState[item.Id] = true });
-      setLoadingStates(initLoadingState); 
-      //khi một phần tử được tải xong, cập nhật trạng thái loading phần tử đó là flase
-      Data.forEach(item => {
-        //  setTimeout(() => {
-          setLoadingStates(prevLoadingStates => ({...prevLoadingStates,[item.Id]: false }));
-        //  },3000)
+      allData.forEach(item => { initLoadingState[item.Id] = true });
+      setLoadingStates(initLoadingState);
+      // Cập nhật trạng thái loading từng phần tử sau khi tải xong
+      allData.forEach(item => {
+        setLoadingStates(prevLoadingStates => ({ ...prevLoadingStates, [item.Id]: false }));
       });
+
     } catch (error) {
       console.log("Failed to get data:", error);
-    }finally{
+    } finally {
       setRefreshing(false);
     }
-    };
+};
+
     // useEffect(() => {
     //   console.log("Loading public:", loadingStates);
     // }, [loadingStates]);

@@ -5,12 +5,14 @@ import { Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { StyleSheet } from 'react-native';
 
+
+
 export default DocumentsRender = ({item}) => {
-    const filePath = "https://docs.google.com/document/d/1ZPJW1LO1gQz7JAF1SA-KcRK1npAkeqPC/view"
+    console.log(item)
     const [isPdfVisible, setPdfVisible] = useState(false);
     const [docPath, setDocPath] = useState('');
 //Open and Close PDF file
-    const handlePress = () => {
+    const handlePress = (filePath) => {
         setPdfVisible(true);
         setDocPath(filePath);
     };
@@ -19,16 +21,20 @@ export default DocumentsRender = ({item}) => {
     };
     return(
         <View style={styles.container}>
-        <TouchableOpacity style={styles.attachmentContainer} onPress={handlePress}>
-             <Icon name="file" size={30} />
-             <Text style={styles.fileName}>aaa</Text>
-         </TouchableOpacity>
+            {item.map((file, index) => (
+            <TouchableOpacity style={styles.attachmentContainer} key={index} onPress={() => handlePress(file.info.original.url)}>
+                <Icon name="file" size={30} />
+                <Text style={styles.fileName}>{file.original_name}</Text>
+            </TouchableOpacity>
+            ))}
+        
 
         <Modal visible={isPdfVisible} onRequestClose={closePdf} animationType="slide">
             <View style={{ flex: 1 }}>
             
                 <WebView
-                source={{uri : docPath}}
+                source={{ uri: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(docPath)}`,}}
+                style={styles.doc}
                 />
                 
                 <Icon
@@ -60,7 +66,7 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        top: 60,
+        top: 10,
         left: 5,
         padding: 10,
         borderRadius: 5,
@@ -69,7 +75,7 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
     },
-    pdf: {
+    doc: {
         flex: 1,
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,

@@ -52,10 +52,12 @@ import { View } from "react-native";
 import { VideosRender } from "./VideosRender";
 import PdfsRender from "./PdfsRender";
 import DocumentsRender from "./DocumentsRender";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+
 
 const AttachmentsRender = ({ items }) => {
-  // Sử dụng useMemo để tối ưu hóa việc tính toán các mảng item
+  useEffect(() => {
+  }, [items]);
   const imageItems = useMemo(() => {
     return items.filter(item => item.type === 8).map(item => item.info);
   }, [items]);
@@ -71,7 +73,6 @@ const AttachmentsRender = ({ items }) => {
   const docItems = useMemo(() => {
     return items.filter(item => item.type === 21);
   }, [items]);
-
   return (
     <View>
       {imageItems.length > 0 && (

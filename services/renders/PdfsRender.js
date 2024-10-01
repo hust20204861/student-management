@@ -8,11 +8,10 @@ import { PDFDocument } from 'pdf-lib';
 
 
 const PdfsRender = ({item}) => {
-    filePath = item[0].info.original.url
     const [isPdfVisible, setPdfVisible] = useState(false);
     const [pdfPath, setPdfPath] = useState('');
 //Open and Close PDF file
-    const handlePress = () => {
+    const handlePress = (filePath) => {
         setPdfVisible(true);
         setPdfPath(filePath);
     };
@@ -22,62 +21,65 @@ const PdfsRender = ({item}) => {
 
 
 
-    const [searchText, setSearchText] = useState('');
-    const [pdfText, setPdfText] = useState('');
-    const [foundPages, setFoundPages] = useState([]);
+//     const [searchText, setSearchText] = useState('');
+//     const [pdfText, setPdfText] = useState('');
+//     const [foundPages, setFoundPages] = useState([]);
 
-    const extractTextFromPdf = async () => {
-    try {
-      // Fetch the PDF file
-      const res = await RNFetchBlob.config({ fileCache: true }).fetch('GET', filePath);
-      const pdfBytes = await res.readFile('base64');
-      // Load the PDF document
-      const pdfDoc = await PDFDocument.load(pdfBytes);
-      const pages = pdfDoc.getPages();
-      // Simulate extracting text from pages
-      let allText = '';
-      //làm sao để vòng for này hoạt động
-      for (let index = 0; index < pages.length; index++) {
-        const page = pages[index];
-        const textContent = await page.getTextContent(); // Trích xuất nội dung văn bản thực tế
-        // Kết hợp văn bản từ các item trong textContent
-        const pageText = textContent.items.map(item => item.str).join(' '); 
-        allText += `Page ${index + 1}: ${pageText} `; // Lưu văn bản của trang
-    }
-      setPdfText(allText);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to extract text: ' + error.message);
-    }
-  };
+//     const extractTextFromPdf = async () => {
+//     try {
+//       // Fetch the PDF file
+//       const res = await RNFetchBlob.config({ fileCache: true }).fetch('GET', filePath);
+//       const pdfBytes = await res.readFile('base64');
+//       // Load the PDF document
+//       const pdfDoc = await PDFDocument.load(pdfBytes);
+//       const pages = pdfDoc.getPages();
+//       // Simulate extracting text from pages
+//       let allText = '';
+//       //làm sao để vòng for này hoạt động
+//       for (let index = 0; index < pages.length; index++) {
+//         const page = pages[index];
+//         const textContent = await page.getTextContent(); // Trích xuất nội dung văn bản thực tế
+//         // Kết hợp văn bản từ các item trong textContent
+//         const pageText = textContent.items.map(item => item.str).join(' '); 
+//         allText += `Page ${index + 1}: ${pageText} `; // Lưu văn bản của trang
+//     }
+//       setPdfText(allText);
+//     } catch (error) {
+//       Alert.alert('Error', 'Failed to extract text: ' + error.message);
+//     }
+//   };
 
-    const handleSearch = () => {
-    const lowerCaseSearchText = searchText.toLowerCase();
-    const matches = [];
-    const pages = pdfText.split('Page'); 
-    pages.forEach((page, index) => {
-      if (page.toLowerCase().includes(lowerCaseSearchText)) {
-        matches.push(index + 1); 
-      }
-    });
-    if (matches.length > 0) {
-      setFoundPages(matches);
-      Alert.alert('Search Results', `Found on pages: ${matches.join(', ')}`);
-    } else {
-      Alert.alert('No Results', 'No matches found for your search.');
-    }
-  };
+//     const handleSearch = () => {
+//     const lowerCaseSearchText = searchText.toLowerCase();
+//     const matches = [];
+//     const pages = pdfText.split('Page'); 
+//     pages.forEach((page, index) => {
+//       if (page.toLowerCase().includes(lowerCaseSearchText)) {
+//         matches.push(index + 1); 
+//       }
+//     });
+//     if (matches.length > 0) {
+//       setFoundPages(matches);
+//       Alert.alert('Search Results', `Found on pages: ${matches.join(', ')}`);
+//     } else {
+//       Alert.alert('No Results', 'No matches found for your search.');
+//     }
+//   };
 
-  useEffect(() => {
-    extractTextFromPdf();
-  }, []);
+//   useEffect(() => {
+//     extractTextFromPdf();
+//   }, []);
 
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.attachmentContainer} onPress={handlePress}>
+            {item.map((file, index) => (
+                <TouchableOpacity style={styles.attachmentContainer} key={index} onPress={() => handlePress(file.info.original.url)}>
                  <Icon name="file-pdf-o" size={30} />
-                 <Text style={styles.fileName}>{item[0].original_name}</Text>
+                 <Text style={styles.fileName}>{file.original_name}</Text>
              </TouchableOpacity>
+            ))}
+            
 
             <Modal visible={isPdfVisible} onRequestClose={closePdf} animationType="slide">
                 <View style={{ flex: 1 }}>
@@ -104,7 +106,7 @@ const PdfsRender = ({item}) => {
                         onPress={closePdf}
                         style={styles.closeButton} 
                     />
-                <View style={{flexDirection:'row'}}>
+                {/* <View style={{flexDirection:'row'}}>
                 <TextInput style={styles.input} placeholder="Search in PDF" value={searchText} onChangeText={setSearchText}/>
                 {foundPages.length > 0 && (
                 <Text  style={{ position: 'absolute', right:50, bottom:15 }}>
@@ -112,7 +114,7 @@ const PdfsRender = ({item}) => {
                 </Text>
       )}
                 <Icon name="search" onPress={handleSearch} size={24} style={{ position: 'absolute', right:15, bottom:13 }}/>
-                </View>
+                </View> */}
                     
                 </View>
             </Modal>

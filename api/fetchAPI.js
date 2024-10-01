@@ -312,7 +312,7 @@ export const Login = async ({email, password}) => {
 }
 
 
-export const getActions = async (id, type, search = null) => {
+export const getActions = async (id, type, search = null, page = 1) => {
   try{
     let url = `/api/school/v1/parent/contacts/${id}`;
     const params = new URLSearchParams();
@@ -321,6 +321,9 @@ export const getActions = async (id, type, search = null) => {
     }
     if (search) {
       params.append('search', search);
+    }
+    if (page) {
+      params.append('page', page);
     }
     if (params.toString()) {
       url += `?${params.toString()}`;
