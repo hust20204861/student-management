@@ -1,42 +1,41 @@
 import { WebView } from 'react-native-webview';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View,  TouchableOpacity, Text, Alert, Modal, TextInput } from 'react-native';
 import { Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { StyleSheet } from 'react-native';
 
-export default DocumentsRender = ({item}) => {
-    const [isDocVisible, setDocVisible] = useState(false);
-    const [docPath, setDocPath] = useState('');
+export default ExcelsRender = ({item}) => {
+    const [isXlsVisible, setXlsVisible] = useState(false);
+    const [xlsPath, setXlsPath] = useState('');
 //Open and Close file
     const handlePress = (filePath) => {
-        setDocVisible(true);
-        setDocPath(filePath);
+        setXlsVisible(true);
+        setXlsPath(filePath);
     };
-    const closeDoc = () => {
-        setDocVisible(false);
+    const closeXls = () => {
+        setXlsVisible(false);
     };
 
     return(
         <View style={styles.container}>
             {item.map((file, index) => (
             <TouchableOpacity style={styles.attachmentContainer} key={index} onPress={() => handlePress(file.info.original.url)}>
-                <Icon name="file-word-o" size={30} style={{color:'blue'}} />
+                <Icon name="file-excel-o" size={30} style={{color:'green'}} />
                 <Text style={styles.fileName}>{file.original_name}</Text>
             </TouchableOpacity>
             ))}
-        <Modal visible={isDocVisible} onRequestClose={closeDoc} animationType="slide">
+        <Modal visible={isXlsVisible} onRequestClose={closeXls} animationType="slide">
             <View style={{ flex: 1 }}>
             
                 <WebView
-                source={{ uri: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(docPath)}`,}}
+                source={{ uri: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(xlsPath)}`,}}
                 style={styles.doc}
                 />
-                {/* <WebView source={"https://docs.google.com/presentation/d/1tQcaDoDXm90mwK50jbbtJW9KtqY92bFB/edit?usp=drive_link&ouid=107617643747497305458"} /> */}
                 <Icon
                     name="arrow-left" 
                     size={24}
-                    onPress={closeDoc}
+                    onPress={closeXls}
                     style={styles.closeButton} 
                 />
             </View>

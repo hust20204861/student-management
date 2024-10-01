@@ -2,7 +2,7 @@ import { View, Text, Button, TextInput, TouchableOpacity, Platform } from "react
 import { ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { getList } from "../api/fetchAPI";
+import { getList } from "../../api/fetchAPI";
 
 const ListScreen = ({ navigation }) => {
 
@@ -22,7 +22,7 @@ const ListScreen = ({ navigation }) => {
   return (
     <ScrollView style={{ padding: 20 }}>
     {data.map((item, index) => (
-      <TouchableOpacity onPress={() => {navigation.navigate("Main", {data: item.ClassYearId})}} key={index}>
+      <TouchableOpacity onPress={() => {navigation.navigate("Main")}} key={index}>
   <View style={{ marginBottom: 10 }}>
         <Text style={{ fontSize: 18 }}>Tên: {item.Name}</Text>
         <Text>{item.YearName}</Text>

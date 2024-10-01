@@ -223,23 +223,24 @@ fullScreenVideoContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black',  // Làm nền đen khi video ở chế độ fullscreen
+    backgroundColor: 'black',  
    
 },
 fullScreenVideo: {
-    width: '100%',  // Video phủ toàn bộ màn hình
+    width: '100%',  
     height: '100%',
 },
 renderVideo: {
     width:Dimensions.get('window').width,  
-    height: 170,
-    margin:5
+    aspectRatio: 16/9,
+    margin:3,
+    justifyContent:"center",
+    alignItems:"center",
 },
 video: {
     flex: 1,        
     width: '100%',  
     height: '100%', 
-    borderRadius: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     resizeMode:'contain',
 
@@ -248,10 +249,10 @@ video: {
 
 //loading container
 actionsContainer: {
-    marginBottom: 30,
+    marginBottom: 5,
     backgroundColor: '#fff',
     overflow: 'hidden',
-    elevation: 5,
+    elevation: 3,
 },
 hiddenImage: {
     width: 0,

@@ -33,9 +33,9 @@ const PrivateActions = ({route}) => {
       setRefreshing(false);
     }
     };
-    useEffect(() => {
-      console.log("Loading private:", loadingStates);
-    }, [loadingStates]);
+    // useEffect(() => {
+    //   console.log("Loading private:", loadingStates);
+    // }, [loadingStates]);
 
     useEffect(() => {
       fetchData();
