@@ -2,6 +2,7 @@ import React from "react";
 import { Image, View, TouchableOpacity, ScrollView, Text, Modal, Dimensions, Animated } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import styles from "../../styles/style";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export const ImagesRender = React.memo(({item}) => {
 
@@ -400,12 +401,12 @@ export const ImagesRender = React.memo(({item}) => {
 
                 {currentImageIndex > 0 && (
                     <TouchableOpacity style={styles.navButtonPrevious} onPress={goToPreviousImage}>
-                        <Text style={styles.navButtonText}>{"<"}</Text>
+                        <Icon name="chevron-right" size={30}/>
                     </TouchableOpacity>
                 )}
                 {currentImageIndex < item.length - 1 && (
                     <TouchableOpacity style={styles.navButtonNext} onPress={goToNextImage}>
-                        <Text style={styles.navButtonText}>{">"}</Text>
+                        <Icon name="chevron-right" size={30}/>
                     </TouchableOpacity>
                 )}
                                 </View>
