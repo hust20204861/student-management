@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import styles from "../../styles/style";
 
 export const ImagesRender = React.memo(({item}) => {
+
         const [imageOrientation, setImageOrientation] = useState({ isHorizontal: false, isVertical: false, isSquare: false });
         useEffect(() => {
             if (Array.isArray(item) && item.length > 0) {
@@ -14,6 +15,24 @@ export const ImagesRender = React.memo(({item}) => {
                         setImageOrientation({ isHorizontal, isVertical, isSquare });
             }
         }, [item]);
+
+        // const loadImage = async (imageUrl) => {
+        //     try {
+        //       const startTime = Date.now(); 
+        //       const response = await fetch(imageUrl);
+        //       if (!response.ok) {
+        //         throw new Error('Network response was not ok');
+        //       }
+        //       const endTime = Date.now(); // End time
+        //       const duration = (endTime - startTime) / 1000; 
+        //       console.log(`Image load time: ${duration} seconds`);
+        //     } catch (error) {
+        //       console.error('Failed to load image:', error);
+        //     }
+        //   };
+        //   loadImage(item[0].large.url);
+          
+        
         const placeholder = "https://file.hstatic.net/200000397757/file/lazyload_e95df2e69ca44092831654bec491fb77_large.jpg"
 
             const [imageSources, setImageSources] = useState(new Array(item.length).fill(placeholder)); 
@@ -88,7 +107,6 @@ export const ImagesRender = React.memo(({item}) => {
             scrollViewRef.current?.scrollTo({ x: prevIndex * Dimensions.get('window').width, animated: true });
         }
     };
-
     const renderByCount = () => {
         const imageCount = item.length 
         switch (imageCount){

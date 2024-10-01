@@ -10,12 +10,15 @@
     "test": "jest"
   },
   "dependencies": {
+    "@cyntler/react-doc-viewer": "^1.17.0",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/slider": "^4.5.3",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
+    "@sishuguojixuefu/react-native-office-viewer": "^0.0.5",
+    "@ui-kitten/components": "^5.3.1",
     "js-cookie": "^3.0.5",
     "latest": "^0.2.0",
     "mammoth": "^1.8.0",
