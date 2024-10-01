@@ -13,7 +13,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async() => {
     const data = await Login({email:"parent_pp1@el-school.net", password:"123456"});
     if(data.code == 200){
-        navigation.navigate("HocSinh");
+        navigation.replace("Main",{data: data.data.active_class_year_id});
         setErrorMessage(null);
     }
     if(data.code != 200){

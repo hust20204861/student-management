@@ -57,17 +57,19 @@ const RenderItem = React.memo(({ item, loadingStates }) => {
         </View>
       ) : (
         <View key={item.Id} style={styles.actionsContainer}>
-          <View style={{ paddingLeft: 10, paddingRight: 10 }}>
-            {item.TotalSeen != null && (
-              <Text style={{ margin: 5 }}>{item.TotalSeen} Saw</Text>
-            )}
-            <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 10 }}>
+          <View style={{ paddingLeft: 15, paddingRight: 10 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 5, marginTop:15, color:'black' }}>
               {item.Title}
             </Text>
-            {item.Content && (<Text style={{ fontSize: 18, marginBottom: 5 }}>{item.Content}</Text>)}
+            {item.Content && (<Text style={{ fontSize: 18, marginBottom: 5, color:'black' }}>{item.Content}</Text>)}
           </View>
           <AttachmentsRender items={item.Attachments} />
-          <Text style={{ margin: 5 }}>Date: {item.ContactDate}</Text>
+          <View style={{flexDirection:'row'}}>
+          <Text style={{ margin: 10 }}>{item.ContactDate}</Text>
+          {item.TotalSeen != null && (
+              <Text style={{ margin: 10, left:170 }}>{item.TotalSeen} Saw</Text>
+            )}
+          </View>
         </View>
       )}
     </View>
@@ -76,11 +78,11 @@ const RenderItem = React.memo(({ item, loadingStates }) => {
 
 const DataRenderer = ({ data, loadingStates, refreshing, onRefresh }) => {
   return (
-    <View style={{ padding: 5 }}>
+    <View style={{ backgroundColor:"#c7c8c9" }}>
       <FlatList
         data={data}
-        renderItem={({ item }) => <RenderItem item={item} loadingStates={loadingStates} />} // Truyền loadingStates vào RenderItem
-        keyExtractor={(item) => item.Id.toString()} // Đảm bảo mỗi item có key duy nhất
+        renderItem={({ item }) => <RenderItem item={item} loadingStates={loadingStates} />} 
+        keyExtractor={(item) => item.Id.toString()} 
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
