@@ -65,9 +65,9 @@ const RenderItem = React.memo(({ item, loadingStates }) => {
           </View>
           <AttachmentsRender items={item.Attachments} />
           <View style={{flexDirection:'row'}}>
-          <Text style={{ margin: 10 }}>{item.ContactDate}</Text>
+          <Text style={{ margin: 10, color:'black' }}>{item.ContactDate}</Text>
           {item.TotalSeen != null && (
-              <Text style={{ margin: 10, left:170 }}>{item.TotalSeen} Saw</Text>
+              <Text style={{ margin: 10, right:0, color:'black' }}>{item.TotalSeen} Saw</Text>
             )}
           </View>
         </View>
