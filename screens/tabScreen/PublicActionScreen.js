@@ -2,6 +2,7 @@ import { View,  } from "react-native";
 import { useState, useEffect } from "react";
 import DataRenderer from "../../services/renders/ActionRender";
 import { getActions } from "../../api/fetchAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const PublicActions = ({route}) => {
@@ -11,6 +12,8 @@ const PublicActions = ({route}) => {
   const [refreshing, setRefreshing] = useState(false)
   const id = route.params.data;
   const type = 1;
+
+ 
   const fetchData = async () => {
     setRefreshing(true);
     let allData = []; 
@@ -18,6 +21,12 @@ const PublicActions = ({route}) => {
     let totalPages = 1; 
 
     try {
+      const key = `data${type}`;
+      const getData = await AsyncStorage.getItem(key);
+      if(getData){
+        setData(JSON.parse(getData))
+      }
+      
       while (currentPage <= totalPages) {
         const response = await getActions(id, type, null, currentPage);
         const pageData = response.data.data;

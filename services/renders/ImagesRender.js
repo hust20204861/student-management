@@ -361,10 +361,43 @@ export const ImagesRender = React.memo(({item}) => {
 return (
     <View >
     {renderByCount()}
-    <ImageFullRender  item={item}
-            isFullScreen={isFullScreen}
-            currentImageIndex={currentImageIndex}
-            handleModalClose={handleModalClose}/>
+    <Modal visible={isFullScreen} 
+            transparent={true} 
+            onRequestClose={handleModalClose}>
+        <View style={styles.modalContainer}>
+            <ScrollView  
+            ref={scrollViewRef} 
+            horizontal 
+            pagingEnabled 
+            showsHorizontalScrollIndicator={false} 
+            scrollEventThrottle={16}
+            // onScroll={scrollHandler}
+            contentOffset={{ x: currentImageIndex * Dimensions.get('window').width }}>
+                {
+                    item.map((img, index) => (
+                        <View key={index} style={styles.fullScreenImageContainer}>
+
+                        <TouchableWithoutFeedback  onPress={handleModalClose}>
+                            <Image source={{ uri: img.large.url }} style={[styles.fullScreenImage,]} />
+                        </TouchableWithoutFeedback>
+
+                        {/* {currentImageIndex > 0 && (
+                            <TouchableOpacity style={styles.navButtonPrevious} onPress={goToPreviousImage}>
+                                <Icon name="chevron-left" size={30}/>
+                            </TouchableOpacity>
+                        )}
+                        {currentImageIndex < item.length - 1 && (
+                            <TouchableOpacity style={styles.navButtonNext} onPress={goToNextImage}>
+                                <Icon name="chevron-right" size={30}/>
+                            </TouchableOpacity>
+                        )} */}
+                        </View>
+                    ))
+               
+                       }
+            </ScrollView>
+        </View>
+    </Modal>
     </View>
     
 );

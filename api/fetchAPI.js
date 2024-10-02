@@ -333,6 +333,10 @@ export const getActions = async (id, type, search = null, page = 1) => {
       throw new Error('Get Data Failed');
     }
     const data = await response.json();
+    if (data.code == 200 && data.data.current_page == 1) {
+      const key = `data${type}`;  // Key sẽ là 'data1' hoặc 'data2'
+      await AsyncStorage.setItem(key, JSON.stringify(data.data.data));
+    }
     return data;
   }catch(error){
     console.error(error.message)

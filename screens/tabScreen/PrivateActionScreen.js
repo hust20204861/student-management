@@ -2,6 +2,7 @@ import { View,  } from "react-native";
 import { useState, useEffect } from "react";
 import DataRenderer from "../../services/renders/ActionRender";
 import { getActions } from "../../api/fetchAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const PrivateActions = ({route}) => {
@@ -15,6 +16,11 @@ const PrivateActions = ({route}) => {
   const fetchData = async () => {
     setRefreshing(true)
     try {
+      const key = `data${type}`;
+      const getData = await AsyncStorage.getItem(key);
+      if(getData){
+        setData(JSON.parse(getData))
+      }
       const response = await getActions(id, type);
       const Data = response.data.data
       setData(Data);
