@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     attachmentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 5,
+        paddingTop: 10,
         borderBottomColor: '#ccc',
     },
     fileName: {

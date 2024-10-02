@@ -6,7 +6,7 @@ import Sound from 'react-native-sound';
 export default AudioesRender = ({ item }) => {
   const [isAudioVisible, setAudioVisible] = useState(false);
   const [audioPlayer, setAudioPlayer] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Open and prepare the audio file to play
   const handlePress = (filePath) => {
@@ -21,7 +21,10 @@ export default AudioesRender = ({ item }) => {
         Alert.alert('Error', 'Failed to load the audio file.');
         return;
       }
-      sound.play();
+      sound.play(() => {
+        setIsPlaying(false); 
+      });
+      setIsPlaying(true); 
       setAudioPlayer(sound);
     });
   };
@@ -68,7 +71,7 @@ export default AudioesRender = ({ item }) => {
       <Modal visible={isAudioVisible} onRequestClose={closeAudio} animationType="slide">
         <View style={styles.modalContainer}>
           <Icon
-            name={isPlaying ? 'pause-circle' : 'play-circle'} // Toggle between play and pause icon
+            name={isPlaying ? 'pause-circle' : 'play-circle'} 
             size={60}
             onPress={togglePlayPause}
             style={styles.playPauseButton}
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
   attachmentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 5,
+    paddingTop: 10,
     borderBottomColor: '#ccc',
   },
   fileName: {

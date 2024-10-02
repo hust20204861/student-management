@@ -32,7 +32,6 @@ export default DocumentsRender = ({item}) => {
                 source={{ uri: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(docPath)}`,}}
                 style={styles.doc}
                 />
-                {/* <WebView source={"https://docs.google.com/presentation/d/1tQcaDoDXm90mwK50jbbtJW9KtqY92bFB/edit?usp=drive_link&ouid=107617643747497305458"} /> */}
                 <Icon
                     name="arrow-left" 
                     size={24}
@@ -49,12 +48,11 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingLeft:15,
         paddingBottom:5,
-        paddingBottom:5
     },
     attachmentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 5,
+        paddingTop: 10,
         borderBottomColor: '#ccc',
     },
     fileName: {

@@ -1,54 +1,16 @@
-// import React from 'react';
-// import { View, Text, FlatList,  } from 'react-native';
-// import  ImageLoading  from '../loadings/ImageLoading';
-// import styles from '../../styles/style';
-// import AttachmentsRender from './AttachmentsRender';
-
-// const DataRenderer = ({ data, loadingStates, refreshing, onRefresh }) => {
-//   const RenderItem = ({item}) => {
-//         return (
-//             <View>
-//             {loadingStates[item.Id] ? (
-//                         <View  key={item.Id} style={{marginBottom: 30}}>
-//                         <ImageLoading/>
-//                         </View>
-//                         ) : (
-//                         <View key={item.Id} style={styles.actionsContainer}>
-//                         <View style={{paddingLeft:10, paddingRight:10}}>
-//                         {item.TotalSeen != null && (<Text style={{margin:5}}>{item.TotalSeen} Saw</Text>)}
-//                         <Text style={{fontWeight:'bold', fontSize:24, marginBottom:10}}>{item.Title}</Text>
-//                         <Text style={{fontSize:18, marginBottom:5}}>{item.Content}</Text>
-//                         </View>
-//                         <AttachmentsRender items={item.Attachments}/>
-//                         <Text style={{margin:5}}>Date: {item.ContactDate}</Text>
-//                         </View>
-//                        )} 
-//             </View>
-//                );        
-//   };
-//   return (
-//     <View style={{ padding: 5,  }}>
-//       <FlatList
-//         data={data} 
-//         renderItem={RenderItem}
-//         keyExtractor={item => item.Id.toString()} 
-//         refreshing={refreshing}
-//         onRefresh={onRefresh}
-//       />
-//     </View>
-//   );
-// };
-
-// export default DataRenderer;
-
-import React from 'react';
-import { View, Text, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import ImageLoading from '../loadings/ImageLoading';
 import styles from '../../styles/style';
 import AttachmentsRender from './AttachmentsRender';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 // Di chuyển RenderItem ra ngoài để tránh việc tái tạo mỗi lần DataRenderer re-render
-const RenderItem = React.memo(({ item, loadingStates }) => {
+const RenderItem = React.memo(({ item, loadingStates, }) => {
+  const [colorLike, setColorLike] = useState('black')
+  const handleLike = () => {
+    setColorLike('blue')
+  }
   return (
     <View>
       {loadingStates[item.Id] ? (
@@ -64,11 +26,14 @@ const RenderItem = React.memo(({ item, loadingStates }) => {
             {item.Content && (<Text style={{ fontSize: 18, marginBottom: 5, color:'black' }}>{item.Content}</Text>)}
           </View>
           <AttachmentsRender items={item.Attachments} />
-          <View style={{flexDirection:'row'}}>
+          <View style={{flexDirection:'row', marginTop:25,}}>
           <Text style={{ margin: 10, color:'black' }}>{item.ContactDate}</Text>
           {item.TotalSeen != null && (
               <Text style={{ margin: 10, right:0, color:'black' }}>{item.TotalSeen} Saw</Text>
             )}
+          <TouchableOpacity onPress={handleLike}>
+          <Icon name='thumbs-o-up' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
+          </TouchableOpacity>
           </View>
         </View>
       )}
@@ -76,7 +41,7 @@ const RenderItem = React.memo(({ item, loadingStates }) => {
   );
 });
 
-const DataRenderer = ({ data, loadingStates, refreshing, onRefresh }) => {
+const DataRenderer = ({ data, loadingStates, refreshing, onRefresh,   }) => {
   return (
     <View style={{ backgroundColor:"#c7c8c9" }}>
       <FlatList

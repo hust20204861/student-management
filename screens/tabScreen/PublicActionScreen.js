@@ -1,41 +1,44 @@
-import { View,  } from "react-native";
+import { TouchableWithoutFeedback, View,  } from "react-native";
 import { useState, useEffect } from "react";
 import DataRenderer from "../../services/renders/ActionRender";
 import { getActions } from "../../api/fetchAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TextInput } from "react-native";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 
 const PublicActions = ({route}) => {
 
   const [data, setData] = useState([]);
   const [loadingStates, setLoadingStates] = useState({});
-  const [refreshing, setRefreshing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+  const [inputShow, setInputShow] = useState(false)
   const id = route.params.data;
   const type = 1;
 
+  const handleShow = () => {
+    setInputShow(!inputShow);
+  }
+
  
-  const fetchData = async () => {
+  const fetchData = async (page) => {
     setRefreshing(true);
     let allData = []; 
-    let currentPage = 1; 
-    let totalPages = 1; 
-
     try {
       const key = `data${type}`;
       const getData = await AsyncStorage.getItem(key);
       if(getData){
         setData(JSON.parse(getData))
       }
-      
-      while (currentPage <= totalPages) {
-        const response = await getActions(id, type, null, currentPage);
+        const response = await getActions(id, type, search, page);
         const pageData = response.data.data;
-        totalPages = response.data.last_page; 
-        allData = [...allData, ...pageData]; // Kết hợp dữ liệu từ trang mới vào mảng
-        currentPage++; 
-      }
-      setData(allData); 
-
+        setTotalPage(response.data.last_page); 
+        allData = [...allData, ...pageData]; 
+        setData(allData); 
+        setCurentPage(page+1); 
       // Khởi tạo trạng thái loading cho tất cả các phần tử
       const initLoadingState = {};
       allData.forEach(item => { initLoadingState[item.Id] = true });
@@ -58,13 +61,39 @@ const PublicActions = ({route}) => {
 
     useEffect(() => {
       fetchData();
-    }, []);
+    }, [search]);
 
+    // const loadMore = () => {
+    //   if (currentPage <= totalPage && !loading) {
+    //     fetchData(currentPage);  
+    //   }
+    // };
   return(
     <View >
-       <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={fetchData}/>
+      {inputShow && 
+      <View>
+      <TextInput style={{width: '100%',
+      height: 40,
+      borderColor: '#ddd',
+      borderWidth: 1,
+      paddingHorizontal: 64,
+      marginVertical: 1,
+      fontSize: 16,
+      backgroundColor:'white'}}
+      placeholder="Nhập nội dung tìm kiếm"
+      value={search}  
+      onChangeText={(text) => setSearch(text)}/>
+      <TouchableWithoutFeedback onPress={handleShow}>
+      <Icon name='chevron-left' size={24} style={{ position: 'absolute', left:0, alignItems:'center', paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20,}}/>
+      </TouchableWithoutFeedback>
+      
+      </View>}
+      {!inputShow && 
+      <TouchableWithoutFeedback onPress={handleShow}>
+      <Icon name='search' size={24} style={{right:0, paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
+      </TouchableWithoutFeedback>}
+       <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={fetchData} />
     </View>
-   
   )
 }
 
