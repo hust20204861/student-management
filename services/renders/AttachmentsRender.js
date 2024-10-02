@@ -8,7 +8,6 @@ import PowerPointsRender from "./PowerPointsRender";
 import ExcelsRender from "./ExcelsRender";
 import AudioesRender from "./AudioesRender";
 
-
 const AttachmentsRender = ({ items }) => {
   useEffect(() => {
   }, [items]);

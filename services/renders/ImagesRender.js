@@ -2,7 +2,7 @@ import React from "react";
 import { Image, View, TouchableOpacity, ScrollView, Text, Modal, Dimensions, TouchableWithoutFeedback } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import styles from "../../styles/style";
-import Animated, { useAnimatedScrollHandler, useSharedValue, withTiming } from 'react-native-reanimated';
+import ImageFullRender from "./ImageFullRender";
 
 export const ImagesRender = React.memo(({item}) => {
 
@@ -361,46 +361,10 @@ export const ImagesRender = React.memo(({item}) => {
 return (
     <View >
     {renderByCount()}
-    <Modal visible={isFullScreen} 
-            transparent={true} 
-            onRequestClose={handleModalClose}>
-        <View style={styles.modalContainer}>
-            <ScrollView  
-            ref={scrollViewRef} 
-            horizontal 
-            pagingEnabled 
-            showsHorizontalScrollIndicator={false} 
-            scrollEventThrottle={16}
-            // onScroll={scrollHandler}
-            contentOffset={{ x: currentImageIndex * Dimensions.get('window').width }}>
-                {isArray ? (
-                    item.map((img, index) => (
-                        <View key={index} style={styles.fullScreenImageContainer}>
-
-                        <TouchableWithoutFeedback  onPress={handleModalClose}>
-                            <Image source={{ uri: img.large.url }} style={[styles.fullScreenImage,]} />
-                        </TouchableWithoutFeedback>
-
-                        {/* {currentImageIndex > 0 && (
-                            <TouchableOpacity style={styles.navButtonPrevious} onPress={goToPreviousImage}>
-                                <Icon name="chevron-left" size={30}/>
-                            </TouchableOpacity>
-                        )}
-                        {currentImageIndex < item.length - 1 && (
-                            <TouchableOpacity style={styles.navButtonNext} onPress={goToNextImage}>
-                                <Icon name="chevron-right" size={30}/>
-                            </TouchableOpacity>
-                        )} */}
-                        </View>
-                    ))
-                ) : (
-                        <TouchableOpacity onPress={handleModalClose}>
-                            <Image source={{ uri: item.large.url }} style={styles.fullScreenImage} />
-                        </TouchableOpacity>
-                )}
-            </ScrollView>
-        </View>
-    </Modal>
+    <ImageFullRender  item={item}
+            isFullScreen={isFullScreen}
+            currentImageIndex={currentImageIndex}
+            handleModalClose={handleModalClose}/>
     </View>
     
 );
