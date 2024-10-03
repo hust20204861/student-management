@@ -5,7 +5,9 @@ import { Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { StyleSheet } from 'react-native';
 import * as Progress from 'react-native-progress';
-import RNFS from 'react-native-fs'
+import RNFS from 'react-native-fs';
+import FileViewer from "react-native-file-viewer";
+
 
 export default DocumentsRender = ({item}) => {
     const [isDocVisible, setDocVisible] = useState(false);
@@ -22,8 +24,9 @@ const handlePress = async (filePath, fileName) => {
     const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`; 
     const fileExists = await RNFS.exists(localFilePath);
     if (fileExists) {
-        setDocPath(`file://${localFilePath}`);
+        setDocPath(localFilePath);
         setDocVisible(true);
+        openFile(localFilePath);
     } else {
         setLoadDown(true);
         setProgress(0); 
@@ -38,8 +41,9 @@ const handlePress = async (filePath, fileName) => {
             }).promise;
 
             if (response.statusCode === 200) {
-                setDocPath(`file://${localFilePath}`); 
+                setDocPath(localFilePath); 
                 setDocVisible(true);
+                openFile(localFilePath);
             } else {
                 Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
             }
@@ -54,6 +58,15 @@ const handlePress = async (filePath, fileName) => {
     const closeDoc = () => {
         setDocVisible(false);
     };
+
+    const openFile = (path) => {
+        FileViewer.open(path)
+        .then(() => console.log("ok"))
+        .catch((error) => {
+            console.log(error)
+        }) 
+            console.log(error.message)
+    }
 console.log(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(docPath)}`)
     return(
         <View style={styles.container}>
@@ -69,10 +82,10 @@ console.log(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURICompo
         <Modal visible={isDocVisible} onRequestClose={closeDoc} animationType="slide">
             <View style={{ flex: 1 }}>
             
-                <WebView
-                source={{ uri: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(docPath)}`}}
+                {/* <WebView
+                source={{ uri: `file://${docPath}` }}
                 style={styles.doc}
-                />
+                /> */}
                 <Icon
                     name="arrow-left" 
                     size={24}
