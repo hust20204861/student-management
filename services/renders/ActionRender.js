@@ -5,14 +5,15 @@ import styles from '../../styles/style';
 import AttachmentsRender from './AttachmentsRender';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-// Di chuyển RenderItem ra ngoài để tránh việc tái tạo mỗi lần DataRenderer re-render
 const RenderItem = React.memo(({ item, loadingStates, }) => {
+  const [countLike, setCountLike] = useState(0)
   const [colorLike, setColorLike] = useState('black')
   const handleLike = () => {
-    setColorLike('blue')
+    setColorLike('red');
+    setCountLike(countLike + 1);
   }
   return (
-    <View>
+    <View style={{ flex:1}}>
       {loadingStates[item.Id] ? (
         <View key={item.Id} style={{ marginBottom: 30 }}>
           <ImageLoading />
@@ -32,24 +33,28 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
               <Text style={{ margin: 10, right:0, color:'black' }}>{item.TotalSeen} Saw</Text>
             )}
           <TouchableOpacity onPress={handleLike}>
-          <Icon name='thumbs-o-up' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
+          <Text>{countLike} likes</Text>
+          <Icon name='heart' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
           </TouchableOpacity>
           </View>
         </View>
       )}
+      
     </View>
   );
 });
 
-const DataRenderer = ({ data, loadingStates, refreshing, onRefresh,   }) => {
+const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, }) => {
   return (
-    <View style={{ backgroundColor:"#c7c8c9" }}>
+    <View style={{ backgroundColor:"#c7c8c9",}}>
       <FlatList
         data={data}
         renderItem={({ item }) => <RenderItem item={item} loadingStates={loadingStates} />} 
         keyExtractor={(item) => item.Id.toString()} 
         refreshing={refreshing}
         onRefresh={onRefresh}
+        onEndReached={loadMore}
+        onEndReachedThreshold={1}
       />
     </View>
   );

@@ -65,3 +65,28 @@ export const getList = async () => {
   }
 }
 
+export const getActivities = async (id, search = null, page = 1) => {
+  try{
+    let url = `/api/school/v1/parent/activities/${id}`;
+    const params = new URLSearchParams();
+    if (search) {
+      params.append('search', search);
+    }
+    if (page) {
+      params.append('page', page);
+    }
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    const response = await fetchApi(url);
+    const data = await response.json();
+    if (data.code==200 && data.data.current_page==1) {
+      await AsyncStorage.setItem('activities', JSON.stringify(data.data.data));
+    }
+    return data;
+  }catch(error){
+    Alert.alert(error.message)
+    throw error;
+  }
+}
+
