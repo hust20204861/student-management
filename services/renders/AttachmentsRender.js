@@ -7,10 +7,11 @@ import React, { useMemo, useEffect } from "react";
 import PowerPointsRender from "./PowerPointsRender";
 import ExcelsRender from "./ExcelsRender";
 import AudioesRender from "./AudioesRender";
+import RNFS from 'react-native-fs';
+
 
 const AttachmentsRender = ({ items }) => {
-  useEffect(() => {
-  }, [items]);
+
   const imageItems = useMemo(() => {
     return items.filter(item => item.type === 8).map(item => item.info);
   }, [items]);

@@ -3,8 +3,57 @@ import { Image, View, TouchableOpacity, ScrollView, Text, Modal, Dimensions, Tou
 import { useState, useEffect, useRef } from "react";
 import styles from "../../styles/style";
 import ImageFullRender from "./ImageFullRender";
+import RNFS from 'react-native-fs'
+import * as Progress from 'react-native-progress';
+const directoryPath = `${RNFS.DocumentDirectoryPath}/saved_images`;
+const saveImageToFile = async (fileUrl, fileName) => {
+    const filePath = `${directoryPath}/${fileName}`;
+    try {
+        const fileExists = await RNFS.exists(filePath);
+        if (fileExists) {
+            // console.log(`File đã tồn tại: ${filePath}. Bỏ qua tải xuống.`);
+            return;
+        }
+      const downloadResult = await RNFS.downloadFile({
+        fromUrl: fileUrl,
+        toFile: filePath,
+      }).promise;
+  
+      if (downloadResult.statusCode === 200) {
+        console.log(`Ảnh đã được lưu: ${filePath}`);
+      } else {
+        console.log('Tải xuống ảnh thất bại:', downloadResult.statusCode);
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải xuống ảnh:', error);
+    }
+  };
+
+  const manageImageStorage = async () => {
+    try {
+      const files = await RNFS.readDir(directoryPath); 
+      if (files.length > 50) {
+        const oldestFile = files[0]; 
+        await RNFS.unlink(oldestFile.path); 
+        console.log(`Đã xóa tệp cũ nhất: ${oldestFile.path}`);
+      }
+    } catch (error) {
+      console.error('Lỗi khi quản lý bộ nhớ ảnh:', error);
+    }
+  };
 
 export const ImagesRender = React.memo(({item}) => {
+    useEffect(() => {
+        RNFS.mkdir(directoryPath).catch(err => console.log('Lỗi khi tạo thư mục:', err));
+      }, []);
+  useEffect(() => {
+        item.forEach(async (img) => {
+          const fileUrl = img.large.url.split('?')[0];
+          const fileName = img.large.url.split('?')[0].split('_').pop();
+          await saveImageToFile(fileUrl, fileName); 
+          await manageImageStorage(); 
+        });
+      }, [item]);
 
     const [imageOrientation, setImageOrientation] = useState({ isHorizontal: false, isVertical: false, isSquare: false });
     useEffect(() => {
@@ -35,7 +84,6 @@ export const ImagesRender = React.memo(({item}) => {
         setImageSources(initialImageSources); 
         setLoadingState(initialLoadingState); 
     }, []);
-    // Cập nhật source và trạng thái khi ảnh small tải xong
     const handleSmallImageLoad = (index) => {
         setLoadingState((prevState) => ({
         ...prevState,
@@ -46,7 +94,6 @@ export const ImagesRender = React.memo(({item}) => {
         },
         }));
     };
-    // Cập nhật source và trạng thái khi ảnh large tải xong
     const handleLargeImageLoad = (index) => {
         setImageSources((prevSources) => ({
         ...prevSources,
@@ -61,6 +108,37 @@ export const ImagesRender = React.memo(({item}) => {
         }));
     };
 
+    useEffect(() => {
+        const checkAndLoadImages = async () => {
+            for (let index = 0; index < item.length; index++) {
+                const img = item[index];
+                const fileUrl = img.large.url;
+                const fileName = fileUrl.split('?')[0].split('_').pop();
+                const filePath = `${directoryPath}/${fileName}`;
+    
+                const fileExists = await RNFS.exists(filePath);
+                if (fileExists) {
+                    setImageSources(prev => ({
+                        ...prev,
+                        [index]: filePath,
+                    }));
+                } else {
+                    // setImageSources(prev => ({
+                    //     ...prev,
+                    //     [index]: img.small.url,
+                    // }));
+
+                    // await saveImageToFile(fileUrl, fileName); 
+                    // setImageSources(prev => ({
+                    //     ...prev,
+                    //     [index]: fileUrl,
+                    // }));
+                }
+            }
+        };
+        checkAndLoadImages();
+    }, [item]);
+
     const [isFullScreen, setFullScreen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0); 
     const scrollViewRef = useRef(null);
@@ -70,7 +148,6 @@ export const ImagesRender = React.memo(({item}) => {
         setCurrentImageIndex(index); 
         setFullScreen(true); 
     };
-
     const handleModalClose = () => {
         setFullScreen(false); 
     };
@@ -100,8 +177,7 @@ export const ImagesRender = React.memo(({item}) => {
         case 1:
             return (
             <TouchableOpacity style={styles.singleImage} onPress={() => handleImagePress(0)}>
-                <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                <Image source={{ uri: `file://${imageSources[index]}` }} style={styles.image}/>
             </TouchableOpacity>
             );
         case 2:
@@ -110,36 +186,30 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View style={{flexDirection: 'colum',}}>
                 <TouchableOpacity style={styles.twoimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.twoimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 </View>
                 )}
                 {imageOrientation.isVertical && (
                 <View style={{flexDirection: 'row', justifyContent:"space-between"}}>
                 <TouchableOpacity style={styles.twoimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.twoimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 </View>
                 )}
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', justifyContent:"space-between"}}>
                 <TouchableOpacity style={styles.twoimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.twoimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 </View>
                 )}
@@ -151,17 +221,14 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View >
                 <TouchableOpacity style={styles.threeimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', justifyContent:"space-between"}}>
                 <TouchableOpacity style={styles.threeimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.threeimageHorizontal} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -169,17 +236,14 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isVertical && (
                 <View  style={{flexDirection:'row'}}>
                 <TouchableOpacity  style={styles.threeimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'colum'}}>
                 <TouchableOpacity style={styles.threeimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.threeimageVertical} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -187,16 +251,13 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                 <TouchableOpacity style={styles.threeimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <TouchableOpacity  style={styles.threeimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.threeimageSquare} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 </View>
                 )}
@@ -208,21 +269,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} />
-                    <Image source={{ uri: item[3].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(3)} />
+                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} onLoadEnd={() => handleLargeImageLoad(3)}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -230,21 +287,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isVertical && (
                 <View style={{flexDirection:'row'}}>
                 <TouchableOpacity style={styles.fourimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} />
-                    <Image source={{ uri: item[3].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(3)} />
+                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} onLoadEnd={() => handleLargeImageLoad(3)}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -252,20 +305,16 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                 <TouchableOpacity style={styles.fourimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} />
-                    <Image source={{ uri: item[3].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(3)} />
+                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} onLoadEnd={() => handleLargeImageLoad(3)}/>
                 </TouchableOpacity>
                 </View>
                 )}
@@ -277,21 +326,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} />
-                    <Image source={{ uri: item[3].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(3)} />
+                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} onLoadEnd={() => handleLargeImageLoad(3)}/>
                     <View style={styles.overlay}>
                         <Text style={styles.remainingText}>
                                     +{item.length - 4}
@@ -304,21 +349,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isVertical && (
                 <View style={{flexDirection:'row'}}>
                 <TouchableOpacity style={styles.fourimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} />
-                    <Image source={{ uri: item[3].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(3)} />
+                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} onLoadEnd={() => handleLargeImageLoad(3)}/>
                     <View style={styles.overlay}>
                         <Text style={styles.remainingText}>
                                     +{item.length - 4}
@@ -331,20 +372,16 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                 <TouchableOpacity style={styles.fourimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} />
-                    <Image source={{ uri: item[0].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(0)} />
+                    <Image source={{ uri: imageSources[0] }} style={styles.image} onLoad={() => handleSmallImageLoad(0)} onLoadEnd={() => handleLargeImageLoad(0)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} />
-                    <Image source={{ uri: item[1].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(1)} />
+                    <Image source={{ uri: imageSources[1] }} style={styles.image} onLoad={() => handleSmallImageLoad(1)} onLoadEnd={() => handleLargeImageLoad(1)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} />
-                    <Image source={{ uri: item[2].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(2)} />
+                    <Image source={{ uri: imageSources[2] }} style={styles.image} onLoad={() => handleSmallImageLoad(2)} onLoadEnd={() => handleLargeImageLoad(2)}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} />
-                    <Image source={{ uri: item[3].large.url }} style={[styles.hiddenImage]} onLoad={() => handleLargeImageLoad(3)} />
+                    <Image source={{ uri: imageSources[3] }} style={styles.image} onLoad={() => handleSmallImageLoad(3)} onLoadEnd={() => handleLargeImageLoad(3)}/>
                     <View style={styles.overlay}>
                         <Text style={styles.remainingText}>
                                     +{item.length - 4}
