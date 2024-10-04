@@ -7,6 +7,7 @@ import { StyleSheet } from 'react-native';
 import * as Progress from 'react-native-progress';
 import RNFS from 'react-native-fs';
 import FileViewer from "react-native-file-viewer";
+import RNFetchBlob from 'rn-fetch-blob';
 
 
 export default DocumentsRender = ({item}) => {
@@ -18,15 +19,38 @@ export default DocumentsRender = ({item}) => {
     const getFileExtension = (fileName) => {
         return fileName.split('.').pop(); 
     };
+    const getMimeType = (fileType) => {
+        switch (fileType) {
+          case 'pdf':
+            return 'application/pdf';
+          case 'jpg':
+          case 'jpeg':
+            return 'image/jpeg';
+          case 'png':
+            return 'image/png';
+          case 'doc':
+            return 'application/msword';
+          case 'docx':
+            return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          case 'xls':
+            return 'application/vnd.ms-excel';
+          case 'xlsx':
+            return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          default:
+            return 'application/octet-stream'; // Kiểu tệp mặc định
+        }
+      };
 //Open and Close PDF file
 const handlePress = async (filePath, fileName) => {
     const fileExtension = getFileExtension(fileName);
     const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`; 
     const fileExists = await RNFS.exists(localFilePath);
+    const mimeType = getMimeType(fileExtension);
+    
     if (fileExists) {
         setDocPath(localFilePath);
         setDocVisible(true);
-        openFile(localFilePath);
+        openFile(localFilePath, mimeType);
     } else {
         setLoadDown(true);
         setProgress(0); 
@@ -43,7 +67,7 @@ const handlePress = async (filePath, fileName) => {
             if (response.statusCode === 200) {
                 setDocPath(localFilePath); 
                 setDocVisible(true);
-                openFile(localFilePath);
+                openFile(localFilePath, mimeType);
             } else {
                 Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
             }
@@ -59,15 +83,13 @@ const handlePress = async (filePath, fileName) => {
         setDocVisible(false);
     };
 
-    const openFile = (path) => {
-        FileViewer.open(path)
-        .then(() => console.log("ok"))
-        .catch((error) => {
-            console.log(error)
-        }) 
-            console.log(error.message)
-    }
-console.log(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(docPath)}`)
+    const openFile = (path, mimeType) => {
+        const android = RNFetchBlob.android;
+            console.log(path,"llllllllll")
+            android.actionViewIntent(`file://${path}`, mimeType)
+            .then(() => console.log("ok"))
+            .catch((err) => console.log('Error opening file: ', err));
+        }
     return(
         <View style={styles.container}>
             {item.map((file, index) => (
@@ -83,7 +105,7 @@ console.log(`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURICompo
             <View style={{ flex: 1 }}>
             
                 {/* <WebView
-                source={{ uri: `file://${docPath}` }}
+                source={{ uri: `https://view.officeapps.live.com/op/embed.aspx?src=file://${encodeURIComponent(docPath)}` }}
                 style={styles.doc}
                 /> */}
                 <Icon

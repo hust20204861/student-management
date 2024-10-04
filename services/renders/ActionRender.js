@@ -27,15 +27,20 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
             {item.Content && (<Text style={{ fontSize: 18, marginBottom: 5, color:'black' }}>{item.Content}</Text>)}
           </View>
           <AttachmentsRender items={item.Attachments} />
-          <View style={{flexDirection:'row', marginTop:25,}}>
-          <Text style={{ margin: 10, color:'black' }}>{item.ContactDate}</Text>
-          {item.TotalSeen != null && (
+          <View>
+          <TouchableOpacity style={{ margin: 5, right:0,flexDirection:'row',}}>
+          <Text>{countLike}</Text>
+          <Icon name='heart' size={15} style={{ margin: 5, right:0, color:"red" }}/>  
+          </TouchableOpacity>
+          </View>
+          <View style={{flexDirection:'row',}}>
+          {/* {item.TotalSeen != null && (
               <Text style={{ margin: 10, right:0, color:'black' }}>{item.TotalSeen} Saw</Text>
-            )}
-          <TouchableOpacity onPress={handleLike}>
-          <Text>{countLike} likes</Text>
+              )} */}
+          <TouchableOpacity onPress={handleLike} style={{ margin: 5, right:0,}}>
           <Icon name='heart' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
           </TouchableOpacity>
+          <Text style={{ margin: 10, color:'black', position:'absolute', right:0 }}>{item.ContactDate}</Text>
           </View>
         </View>
       )}
