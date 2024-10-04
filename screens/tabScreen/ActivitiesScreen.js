@@ -71,6 +71,7 @@ const Activities = ({route}) => {
       Alert.alert("End")
       }
     };
+    console.log(data)
   return(
     <View >
       {inputShow && 

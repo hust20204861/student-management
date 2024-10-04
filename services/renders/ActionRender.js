@@ -12,6 +12,8 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
     setColorLike('red');
     setCountLike(countLike + 1);
   }
+
+ 
   return (
     <View style={{ flex:1}}>
       {loadingStates[item.Id] ? (
@@ -34,9 +36,14 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
           </TouchableOpacity>
           </View>
           <View style={{flexDirection:'row',}}>
-          {/* {item.TotalSeen != null && (
-              <Text style={{ margin: 10, right:0, color:'black' }}>{item.TotalSeen} Saw</Text>
-              )} */}
+          {item.TotalSeen != null && (
+              <Text style={{ margin: 10, right:0, color:'black', position:'absolute', right:150 }}>{item.TotalSeen} Saw</Text>
+              )}
+              {/* {item.TotalLike && 
+              <TouchableOpacity >
+              <Text>{item.TotalLike}</Text>
+              </TouchableOpacity>
+              } */}
           <TouchableOpacity onPress={handleLike} style={{ margin: 5, right:0,}}>
           <Icon name='heart' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
           </TouchableOpacity>
@@ -50,6 +57,7 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
 });
 
 const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, }) => {
+
   return (
     <View style={{ backgroundColor:"#c7c8c9",}}>
       <FlatList

@@ -67,10 +67,10 @@ export const ImagesRender = React.memo(({item}) => {
     }, [item]);
             
     const placeholder = "https://file.hstatic.net/200000397757/file/lazyload_e95df2e69ca44092831654bec491fb77_large.jpg"
-
     const [imageSources, setImageSources] = useState(new Array(item.length).fill(placeholder)); 
-        
+    
     useEffect(() => {
+        //check xem file ảnh đã được lưu trước hay chưa
         const checkAndLoadImages = async () => {
             for (let index = 0; index < item.length; index++) {
                 const img = item[index];
@@ -79,23 +79,22 @@ export const ImagesRender = React.memo(({item}) => {
                 const filePath = `${directoryPath}/${fileName}`;
     
                 const fileExists = await RNFS.exists(filePath);
+                //nếu đã có file ảnh, render từ file đã lưu ngay
                 if (fileExists) {
                     setImageSources(prev => ({
                         ...prev,
                         [index]: filePath,
                     }));
                 } else {
-                    console.log("ảnh chưa tồn tại, chờ laod tý")
-                    setImageSources(prev => ({
-                        ...prev,
-                        [index]: img.small.url,
-                    }));
-
-                    await saveImageToFile(fileUrl, fileName); 
-                    setImageSources(prev => ({
-                        ...prev,
-                        [index]: fileUrl,
-                    }));
+                    setImageSources((prevSources) => ({
+                        ...prevSources,
+                        [index]: item[index].small.url,
+                        }));
+                    
+                    setImageSources((prevSources) => ({
+                        ...prevSources,
+                        [index]: item[index].large.url,
+                        }));
                 }
             }
         };
@@ -105,7 +104,6 @@ export const ImagesRender = React.memo(({item}) => {
     const [isFullScreen, setFullScreen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0); 
     const scrollViewRef = useRef(null);
-    const isArray = Array.isArray(item);
 
     const handleImagePress = (index) => {
         setCurrentImageIndex(index); 
@@ -114,24 +112,21 @@ export const ImagesRender = React.memo(({item}) => {
     const handleModalClose = () => {
         setFullScreen(false); 
     };
-    const goToNextImage = () => {
-        if (currentImageIndex < item.length - 1) {
-            const nextIndex = currentImageIndex + 1;
-            setCurrentImageIndex(nextIndex);
-            scrollViewRef.current?.scrollTo({ x: nextIndex * Dimensions.get('window').width, animated: true });
-        }
-    };
-    const goToPreviousImage = () => {
-        if (currentImageIndex > 0) {
-            const prevIndex = currentImageIndex - 1;
-            setCurrentImageIndex(prevIndex);
-            scrollViewRef.current?.scrollTo({ x: prevIndex * Dimensions.get('window').width, animated: true });
-        }
-    };
-    // const scrollX = useSharedValue(0);
-    // const scrollHandler = useAnimatedScrollHandler((event) => {
-    //   scrollX.value = withTiming(event.contentOffset.x, { duration: 800 }); 
-    // });
+    // const goToNextImage = () => {
+    //     if (currentImageIndex < item.length - 1) {
+    //         const nextIndex = currentImageIndex + 1;
+    //         setCurrentImageIndex(nextIndex);
+    //         scrollViewRef.current?.scrollTo({ x: nextIndex * Dimensions.get('window').width, animated: true });
+    //     }
+    // };
+    // const goToPreviousImage = () => {
+    //     if (currentImageIndex > 0) {
+    //         const prevIndex = currentImageIndex - 1;
+    //         setCurrentImageIndex(prevIndex);
+    //         scrollViewRef.current?.scrollTo({ x: prevIndex * Dimensions.get('window').width, animated: true });
+    //     }
+    // };
+
     const renderByCount = () => {
     const imageCount = item.length 
     switch (imageCount){

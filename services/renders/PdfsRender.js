@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Alert, Modal } from 'react-native';
 import Pdf from 'react-native-pdf'; 
 import { Dimensions } from 'react-native';
@@ -11,45 +11,52 @@ const PdfsRender = ({item}) => {
     const [pdfPath, setPdfPath] = useState('');
     const [loadDown, setLoadDown] = useState({})
     const [progress, setProgress] = useState({})
+    const [isDownload, setIsDownload] = useState({})
 
     const getFileExtension = (fileName) => {
         return fileName.split('.').pop(); 
     };
-//Open and Close PDF file
-const handlePress = async (filePath, fileName, index) => {
-    const fileExtension = getFileExtension(fileName);
-    const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`; 
-    const fileExists = await RNFS.exists(localFilePath);
-    if (fileExists) {
+    useEffect(() => {
+        const checkFiles = async () => {
+            for (let index = 0; index < item.length; index++) {
+                const fileName = item[index].info.original.name;
+                const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+                const fileExists = await RNFS.exists(localFilePath);
+                setLoadDown((prevState) => ({ ...prevState, [index]: !fileExists }));
+            }
+        };
+        checkFiles();
+    }, [item]);
+const handlePress = async ( fileName ) => {
+    const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
         setPdfPath(localFilePath);
         setPdfVisible(true);
-    } else {
-        setLoadDown((prevState) => ({ ...prevState, [index]: true }));
-        setProgress((prevState) => ({ ...prevState, [index]: 0 })); 
-        try {
-            const response = await RNFS.downloadFile({
-                fromUrl: filePath,
-                toFile: localFilePath,
-                progress: (res) => {
-                    const progressValue = res.bytesWritten / res.contentLength; 
-                    setProgress((prevState) => ({ ...prevState, [index]: progressValue })); 
-                },
-            }).promise;
-
-            if (response.statusCode === 200) {
-                setPdfPath(localFilePath); 
-                setPdfVisible(true);
-            } else {
-                Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
-            }
-        } catch (error) {
-            console.error('Lỗi khi tải xuống file PDF:', error);
-            Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
-        } finally{
-            setLoadDown((prevState) => ({ ...prevState, [index]: false }));
-        }
-    }
+        
 };
+const handleDownLoad = async(filePath, fileName, index) => {
+    const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+    try {
+        setProgress((prevState) => ({ ...prevState, [index]: 0 })); 
+        setIsDownload((prevState) => ({ ...prevState, [index]: true }))
+        const response = await RNFS.downloadFile({
+            fromUrl: filePath,
+            toFile: localFilePath,
+            progress: (res) => {
+                const progressValue = res.bytesWritten / res.contentLength; 
+                setProgress((prevState) => ({ ...prevState, [index]: progressValue })); 
+            },
+        }).promise;
+        if (response.statusCode === 200) {
+            setLoadDown((prevState) => ({ ...prevState, [index]: false })); 
+            setIsDownload((prevState) => ({ ...prevState, [index]: false }))
+        } else {
+            Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải xuống file PDF:', error);
+        Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
+    } 
+}
     const closePdf = () => {
         setPdfVisible(false);
     };
@@ -57,13 +64,20 @@ const handlePress = async (filePath, fileName, index) => {
     return (
         <View style={styles.container}>
             {item.map((file, index) => (
-                <TouchableOpacity style={styles.attachmentContainer} key={index} onPress={() => handlePress(file.info.original.url, file.info.original.name, index)}>
+                <View key={index}>
+                <TouchableOpacity style={styles.attachmentContainer}>
                  <Icon name="file-pdf-o" size={30} style={{color:'red'}}/>
-                 <View>
                  <Text style={styles.fileName}>{file.original_name}</Text>
-                 { loadDown[index] && <Progress.Bar progress={progress[index]} width={300} style={{ position:'absolute', top:25, left:10}}/>}
-                 </View>
-             </TouchableOpacity>
+                </TouchableOpacity>
+                 <TouchableOpacity style={{position:'absolute', right:15}}>
+                 {loadDown[index] && <Icon name='download' size={24} onPress={() => handleDownLoad(file.info.original.url, file.info.original.name, index)}/>}
+                 {!loadDown[index] && 
+                 <TouchableOpacity onPress={() => handlePress( file.info.original.name )}>
+                 <Icon name='folder-o' size={24} />
+                 </TouchableOpacity>}
+                 </TouchableOpacity>
+                 {isDownload[index] && <Progress.Bar progress={progress[index]} width={300} style={{ position:'absolute', top:25, left:10}}/>}
+             </View>
             ))}
             <Modal visible={isPdfVisible} onRequestClose={closePdf} animationType="slide">
                 <View style={{ flex: 1 }}>
