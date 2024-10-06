@@ -6,7 +6,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-
 const PublicActions = ({route}) => {
 
   const [data, setData] = useState([]);
@@ -17,6 +16,7 @@ const PublicActions = ({route}) => {
   const [totalPage, setTotalPage] = useState(1);
   const [inputShow, setInputShow] = useState(false)
   const [end, setEnd] = useState(false)
+  const [preData, setPreData] = useState([]);
   const id = route.params.data;
   const type = 1;
 
@@ -24,7 +24,7 @@ const PublicActions = ({route}) => {
     setInputShow(!inputShow);
   }
 
-  const fetchData = async (page) => {
+  const fetchData = async () => {
     setRefreshing(true);
     try {
       const key = `data${type}`;
@@ -32,47 +32,58 @@ const PublicActions = ({route}) => {
       if(getData){
         setData(JSON.parse(getData))
       }
-        const response = await getActions(id, type, search, page);
-        const pageData = response.data.data;
-        setData(prev => {
-          if(response.data.current_page == 1){
-            return pageData;
-          }
-          const allData = prev.concat(pageData);
-          return allData;
-        });
-        setTotalPage(response.data.last_page); 
-        setCurrentPage(response.data.current_page)
-      // Khởi tạo trạng thái loading cho tất cả các phần tử
-      const initLoadingState = {};
-      pageData.forEach(item => { initLoadingState[item.Id] = true });
-      setLoadingStates(initLoadingState);
-      // Cập nhật trạng thái loading từng phần tử sau khi tải xong
-      pageData.forEach(item => {
-        setLoadingStates(prevLoadingStates => ({ ...prevLoadingStates, [item.Id]: false }));
-      });
-
+      const response = await getActions(id, type, search, 1);
+      setTotalPage(response.data.last_page); 
+      setCurrentPage(response.data.current_page);
+      setData( response.data.data);
     } catch (error) {
       console.log("Failed to get data:", error);
     } finally {
       setRefreshing(false);
     }
 };
+
+  const nextData = async() => {
+    try{
+    const response = await getActions(id, type, search, currentPage + 1);
+    const pageData = response.data.data
+    setPreData(pageData)
+    const initLoadingState = {};
+    pageData.forEach(item => { initLoadingState[item.Id] = true });
+      setLoadingStates(initLoadingState);
+      pageData.forEach(item => {
+        setLoadingStates(prevLoadingStates => ({ ...prevLoadingStates, [item.Id]: false }));
+      });
+    } catch (error) {
+      console.log("Failed to get data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }
     // useEffect(() => {
     //   console.log("Loading public:", loadingStates);
     // }, [loadingStates]);
     useEffect(() => {
       fetchData();
-    }, [search]);
+    },[]);
+    useEffect(() => {
+      nextData();
+    }, [currentPage, search]);
 
     const loadMore = () => {
       if (currentPage < totalPage) {
-        fetchData(currentPage +1);  
+        setCurrentPage(prev => prev + 1)  
+        setData(prev => {
+          const allData = prev.concat(preData);
+          return allData
+        })
       }
       if (currentPage == totalPage){
       setEnd(true);
       }
     };
+    console.log("page:",currentPage);
+    console.log("data:",data.length);
   return(
     <View style={{ flex: 1, }}>
       {inputShow && 
@@ -89,7 +100,7 @@ const PublicActions = ({route}) => {
       value={search}  
       onChangeText={(text) => setSearch(text)}/>
       <TouchableWithoutFeedback onPress={handleShow}>
-      <Icon name='chevron-left' size={24} style={{ position: 'absolute', left:0, alignItems:'center', paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20,}}/>
+      <Icon name='chevron-left' size={24} style={{ position:'absolute', left:0, alignItems:'center', paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20,}}/>
       </TouchableWithoutFeedback>
       </View>}
       {!inputShow && 

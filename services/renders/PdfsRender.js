@@ -37,6 +37,7 @@ const handleDownLoad = async(filePath, fileName, index) => {
     const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
     try {
         setProgress((prevState) => ({ ...prevState, [index]: 0 })); 
+        console.log(Date.now(),"timeeeee")
         setIsDownload((prevState) => ({ ...prevState, [index]: true }))
         const response = await RNFS.downloadFile({
             fromUrl: filePath,
@@ -60,7 +61,6 @@ const handleDownLoad = async(filePath, fileName, index) => {
     const closePdf = () => {
         setPdfVisible(false);
     };
-
     return (
         <View style={styles.container}>
             {item.map((file, index) => (
@@ -69,14 +69,14 @@ const handleDownLoad = async(filePath, fileName, index) => {
                  <Icon name="file-pdf-o" size={30} style={{color:'red'}}/>
                  <Text style={styles.fileName}>{file.original_name}</Text>
                 </TouchableOpacity>
-                 <TouchableOpacity style={{position:'absolute', right:15}}>
+                 <TouchableOpacity style={{position:'absolute', right:15, top:10}}>
                  {loadDown[index] && <Icon name='download' size={24} onPress={() => handleDownLoad(file.info.original.url, file.info.original.name, index)}/>}
                  {!loadDown[index] && 
                  <TouchableOpacity onPress={() => handlePress( file.info.original.name )}>
                  <Icon name='folder-o' size={24} />
                  </TouchableOpacity>}
                  </TouchableOpacity>
-                 {isDownload[index] && <Progress.Bar progress={progress[index]} width={300} style={{ position:'absolute', top:25, left:10}}/>}
+                 {isDownload[index] && <Progress.Bar progress={progress[index]} width={300} style={{ position:'absolute', top:25, left:30}}/>}
              </View>
             ))}
             <Modal visible={isPdfVisible} onRequestClose={closePdf} animationType="slide">
@@ -124,7 +124,8 @@ const styles = StyleSheet.create({
     fileName: {
         marginLeft: 10,
         fontSize: 16,
-        color:'black'
+        color:'black',
+        width: "75%"
     },
     closeButton: {
         position: 'absolute',

@@ -12,7 +12,6 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
     setColorLike('red');
     setCountLike(countLike + 1);
   }
-
  
   return (
     <View style={{ flex:1}}>
@@ -67,7 +66,7 @@ const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, })
         refreshing={refreshing}
         onRefresh={onRefresh}
         onEndReached={loadMore}
-        onEndReachedThreshold={1}
+        onEndReachedThreshold={0.5}
       />
     </View>
   );

@@ -32,7 +32,6 @@ const saveImageToFile = async (fileUrl, fileName) => {
   const manageImageStorage = async () => {
     try {
       const files = await RNFS.readDir(directoryPath); 
-
       if (files.length > 50) {
         const oldestFile = files[0]; 
         await RNFS.unlink(oldestFile.path); 
@@ -83,18 +82,19 @@ export const ImagesRender = React.memo(({item}) => {
                 if (fileExists) {
                     setImageSources(prev => ({
                         ...prev,
-                        [index]: filePath,
+                        [index]: `file://${filePath}`,
                     }));
                 } else {
+                    // setImageSources((prevSources) => ({
+                    //     ...prevSources,
+                    //     [index]: item[index].small.url,
+                    //     }))
+
+
                     setImageSources((prevSources) => ({
                         ...prevSources,
-                        [index]: item[index].small.url,
-                        }));
-                    
-                    setImageSources((prevSources) => ({
-                        ...prevSources,
-                        [index]: item[index].large.url,
-                        }));
+                        [index]: item[index].large.url
+                        }));       
                 }
             }
         };
@@ -135,7 +135,7 @@ export const ImagesRender = React.memo(({item}) => {
         case 1:
             return (
             <TouchableOpacity key={0} style={styles.singleImage} onPress={() => handleImagePress(0)}>
-                <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                <Image source={{ uri: imageSources[0] }} style={styles.image}/>
             </TouchableOpacity>
             );
         case 2:
@@ -144,30 +144,30 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View style={{flexDirection: 'colum',}}>
                 <TouchableOpacity style={styles.twoimageHorizontal0} onPress={() => handleImagePress(0)}>
-                <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.twoimageHorizontal} onPress={() => handleImagePress(1)}>
-                <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 )}
                 {imageOrientation.isVertical && (
                 <View style={{flexDirection: 'row', justifyContent:"space-between"}}>
                 <TouchableOpacity style={styles.twoimageVertical0} onPress={() => handleImagePress(0)}>
-                <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.twoimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 )}
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', justifyContent:"space-between"}}>
                 <TouchableOpacity style={styles.twoimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.twoimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 )}
@@ -179,14 +179,14 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View >
                 <TouchableOpacity style={styles.threeimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', justifyContent:"space-between"}}>
                 <TouchableOpacity style={styles.threeimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.threeimageHorizontal} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -194,14 +194,14 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isVertical && (
                 <View  style={{flexDirection:'row'}}>
                 <TouchableOpacity  style={styles.threeimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'colum'}}>
                 <TouchableOpacity style={styles.threeimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.threeimageVertical} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -209,13 +209,13 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                 <TouchableOpacity style={styles.threeimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity  style={styles.threeimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.threeimageSquare} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 )}
@@ -227,17 +227,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: `file://${imageSources[3]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[3] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -245,17 +245,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isVertical && (
                 <View style={{flexDirection:'row'}}>
                 <TouchableOpacity style={styles.fourimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: `file://${imageSources[3]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[3] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 </View>
@@ -263,16 +263,16 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                 <TouchableOpacity style={styles.fourimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: `file://${imageSources[3]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[3] }} style={styles.image}/>
                 </TouchableOpacity>
                 </View>
                 )}
@@ -284,17 +284,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isHorizontal && (
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageHorizontal} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: `file://${imageSources[3]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[3] }} style={styles.image}/>
                     <View style={styles.overlay}>
                         <Text style={styles.remainingText}>
                                     +{item.length - 4}
@@ -307,17 +307,17 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isVertical && (
                 <View style={{flexDirection:'row'}}>
                 <TouchableOpacity style={styles.fourimageVertical0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <View style={{flexDirection:'colum', justifyContent:'space-around'}}>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri:imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageVertical} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: `file://${imageSources[3]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[3] }} style={styles.image}/>
                     <View style={styles.overlay}>
                         <Text style={styles.remainingText}>
                                     +{item.length - 4}
@@ -330,16 +330,16 @@ export const ImagesRender = React.memo(({item}) => {
                 {imageOrientation.isSquare && (
                 <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                 <TouchableOpacity style={styles.fourimageSquare0} onPress={() => handleImagePress(0)}>
-                    <Image source={{ uri: `file://${imageSources[0]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[0] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(1)}>
-                    <Image source={{ uri: `file://${imageSources[1]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[1] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(2)}>
-                    <Image source={{ uri: `file://${imageSources[2]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[2] }} style={styles.image}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.fourimageSquare} onPress={() => handleImagePress(3)}>
-                    <Image source={{ uri: `file://${imageSources[3]}` }} style={styles.image}/>
+                    <Image source={{ uri: imageSources[3] }} style={styles.image}/>
                     <View style={styles.overlay}>
                         <Text style={styles.remainingText}>
                                     +{item.length - 4}
