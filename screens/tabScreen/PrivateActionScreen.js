@@ -1,58 +1,122 @@
-import { View,  } from "react-native";
+import { Alert, TouchableWithoutFeedback, View, Text  } from "react-native";
 import { useState, useEffect } from "react";
 import DataRenderer from "../../services/renders/ActionRender";
 import { getActions } from "../../api/fetchAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { TextInput } from "react-native";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const PrivateActions = ({route}) => {
 
   const [data, setData] = useState([]);
   const [loadingStates, setLoadingStates] = useState({});
-  const [refreshing, setRefreshing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+  const [inputShow, setInputShow] = useState(false)
+  const [end, setEnd] = useState(false)
+  const [preData, setPreData] = useState([]);
   const id = route.params.data;
   const type = 2;
 
+  const handleShow = () => {
+    setInputShow(!inputShow);
+  }
+
   const fetchData = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
       const key = `data${type}`;
       const getData = await AsyncStorage.getItem(key);
       if(getData){
         setData(JSON.parse(getData))
       }
-      const response = await getActions(id, type);
-      const Data = response.data.data
-      setData(Data);
+      const response = await getActions(id, type, search, 1);
+      setTotalPage(response.data.last_page); 
+      setCurrentPage(response.data.current_page);
+      setData( response.data.data);
+    } catch (error) {
+      console.log("Failed to get data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+};
 
-      //tạo đối tượng init với mỗi thuộc tính là trạng thái của từng phần tử trong getData
-      const initLoadingState = {};
-      Data.forEach(item => { initLoadingState[item.Id] = true });
-      setLoadingStates(initLoadingState); 
-      //khi một phần tử được tải xong, cập nhật trạng thái loading phần tử đó là flase
-      Data.forEach(item => {
-          setLoadingStates(prevLoadingStates => ({...prevLoadingStates,[item.Id]: false }));
+  const nextData = async() => {
+    try{
+    const response = await getActions(id, type, search, currentPage + 1);
+    const pageData = response.data.data
+    setPreData(pageData)
+    const initLoadingState = {};
+    pageData.forEach(item => { initLoadingState[item.Id] = true });
+      setLoadingStates(initLoadingState);
+    pageData.forEach(item => {
+        setLoadingStates(prevLoadingStates => ({ ...prevLoadingStates, [item.Id]: false }));
       });
     } catch (error) {
       console.log("Failed to get data:", error);
-    }finally{
+    } finally {
       setRefreshing(false);
     }
-    };
+  }
     // useEffect(() => {
     //   console.log("Loading private:", loadingStates);
     // }, [loadingStates]);
+      useEffect(() => {
+        fetchData();
+      },[]);
 
-    useEffect(() => {
-      fetchData();
-    }, []);
-
-  return(
-    <View >
+      useEffect(() => {
+        fetchData();
+        nextData()
+      },[search])
       
-       <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={fetchData}/>
+      useEffect(() => {
+        nextData();
+      }, [currentPage]);
+
+    const loadMore = () => {
+      if (currentPage < totalPage) {
+        setCurrentPage(prev => prev + 1)  
+        setData(prev => {
+          const allData = prev.concat(preData);
+          return allData
+        })
+      }
+      if (currentPage == totalPage){
+      setEnd(true);
+      }
+    };
+    console.log("page:",currentPage);
+    console.log("data:",data.length);
+  return(
+    <View style={{ flex: 1, }}>
+      {inputShow && 
+      <View>
+      <TextInput style={{width: '100%',
+      height: 40,
+      borderColor: '#ddd',
+      borderWidth: 1,
+      paddingHorizontal: 64,
+      marginVertical: 1,
+      fontSize: 16,
+      backgroundColor:'white'}}
+      placeholder="Nhập nội dung tìm kiếm"
+      value={search}  
+      onChangeText={(text) => setSearch(text)}/>
+      <TouchableWithoutFeedback onPress={handleShow}>
+      <Icon name='chevron-left' size={24} style={{ position:'absolute', left:0, alignItems:'center', paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20,}}/>
+      </TouchableWithoutFeedback>
+      </View>}
+      {!inputShow && 
+      <View >
+      <TouchableWithoutFeedback onPress={handleShow}>
+      <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
+      </TouchableWithoutFeedback>
+      </View>}
+      <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={fetchData} loadMore={loadMore} />
     </View>
-   
   )
 }
 

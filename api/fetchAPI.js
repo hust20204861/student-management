@@ -90,3 +90,17 @@ export const getActivities = async (id, search = null, page = 1) => {
   }
 }
 
+
+export const likeStatus = async(id, contentType) => { 
+  try{
+    const response = await fetchApi('/api/school/v1/parent/interaction/like', 'POST', {content_id: id, content_type: contentType});
+    if(!response.ok){
+      console.log("like failed")
+    }
+    console.log("like success")
+    const data = response.json();
+    return data;
+  }catch(error){
+    console.error('Lỗi:', error);
+  }
+}

@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import ImageLoading from '../loadings/ImageLoading';
 import styles from '../../styles/style';
 import AttachmentsRender from './AttachmentsRender';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { likeStatus } from '../../api/fetchAPI';
 
 const RenderItem = React.memo(({ item, loadingStates, }) => {
   const [countLike, setCountLike] = useState(0)
-  const [colorLike, setColorLike] = useState('black')
-  const handleLike = () => {
-    setColorLike('red');
-    setCountLike(countLike + 1);
+  const [colorLike, setColorLike] = useState('')
+  const handleLike = async() => {
+    const response = await likeStatus(item.Id, "contact");
+    console.log(response)
+    if(response.code == 200){
+    }
   }
- 
+  useEffect(() => {
+    if(item.Liked == true){
+      setColorLike("red")
+    }else{
+      setColorLike("black");
+    }
+  },[])
   return (
     <View style={{ flex:1}}>
       {loadingStates[item.Id] ? (
@@ -30,19 +39,11 @@ const RenderItem = React.memo(({ item, loadingStates, }) => {
           <AttachmentsRender items={item.Attachments} />
           <View>
           <TouchableOpacity style={{ margin: 5, right:0,flexDirection:'row',}}>
-          <Text>{countLike}</Text>
+          <Text>{item.TotalLike}</Text>
           <Icon name='heart' size={15} style={{ margin: 5, right:0, color:"red" }}/>  
           </TouchableOpacity>
           </View>
           <View style={{flexDirection:'row',}}>
-          {item.TotalSeen != null && (
-              <Text style={{ margin: 10, right:0, color:'black', position:'absolute', right:150 }}>{item.TotalSeen} Saw</Text>
-              )}
-              {/* {item.TotalLike && 
-              <TouchableOpacity >
-              <Text>{item.TotalLike}</Text>
-              </TouchableOpacity>
-              } */}
           <TouchableOpacity onPress={handleLike} style={{ margin: 5, right:0,}}>
           <Icon name='heart' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
           </TouchableOpacity>

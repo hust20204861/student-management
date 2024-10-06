@@ -85,7 +85,6 @@ const handlePress = async (filePath, fileName) => {
 
     const openFile = (path, mimeType) => {
         const android = RNFetchBlob.android;
-            console.log(path,"llllllllll")
             android.actionViewIntent(`file://${path}`, mimeType)
             .then(() => console.log("ok"))
             .catch((err) => console.log('Error opening file: ', err));

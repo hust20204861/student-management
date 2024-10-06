@@ -13,9 +13,6 @@ const PdfsRender = ({item}) => {
     const [progress, setProgress] = useState({})
     const [isDownload, setIsDownload] = useState({})
 
-    const getFileExtension = (fileName) => {
-        return fileName.split('.').pop(); 
-    };
     useEffect(() => {
         const checkFiles = async () => {
             for (let index = 0; index < item.length; index++) {
@@ -33,26 +30,31 @@ const handlePress = async ( fileName ) => {
         setPdfVisible(true);
         
 };
-const handleDownLoad = async(filePath, fileName, index) => {
+const handleDownLoad = (filePath, fileName, index) => {
     const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
     try {
         setProgress((prevState) => ({ ...prevState, [index]: 0 })); 
-        console.log(Date.now(),"timeeeee")
         setIsDownload((prevState) => ({ ...prevState, [index]: true }))
-        const response = await RNFS.downloadFile({
+        RNFS.downloadFile({
             fromUrl: filePath,
             toFile: localFilePath,
             progress: (res) => {
-                const progressValue = res.bytesWritten / res.contentLength; 
-                setProgress((prevState) => ({ ...prevState, [index]: progressValue })); 
+                const progressValue = res.bytesWritten / res.contentLength;
+                setProgress((prevState) => ({ ...prevState, [index]: progressValue }));
             },
-        }).promise;
-        if (response.statusCode === 200) {
-            setLoadDown((prevState) => ({ ...prevState, [index]: false })); 
-            setIsDownload((prevState) => ({ ...prevState, [index]: false }))
-        } else {
+        }).promise
+        .then(response => {
+            if (response.statusCode === 200) {
+                setLoadDown((prevState) => ({ ...prevState, [index]: false }));  
+                setIsDownload((prevState) => ({ ...prevState, [index]: false }));  
+            } else {
+                Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi khi tải xuống file PDF:', error);
             Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
-        }
+        });
     } catch (error) {
         console.error('Lỗi khi tải xuống file PDF:', error);
         Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');

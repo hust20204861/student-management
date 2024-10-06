@@ -51,7 +51,7 @@ const PublicActions = ({route}) => {
     const initLoadingState = {};
     pageData.forEach(item => { initLoadingState[item.Id] = true });
       setLoadingStates(initLoadingState);
-      pageData.forEach(item => {
+    pageData.forEach(item => {
         setLoadingStates(prevLoadingStates => ({ ...prevLoadingStates, [item.Id]: false }));
       });
     } catch (error) {
@@ -63,12 +63,18 @@ const PublicActions = ({route}) => {
     // useEffect(() => {
     //   console.log("Loading public:", loadingStates);
     // }, [loadingStates]);
-    useEffect(() => {
-      fetchData();
-    },[]);
-    useEffect(() => {
-      nextData();
-    }, [currentPage, search]);
+      useEffect(() => {
+        fetchData();
+      },[]);
+
+      useEffect(() => {
+        fetchData();
+        nextData()
+      },[search])
+      
+      useEffect(() => {
+        nextData();
+      }, [currentPage]);
 
     const loadMore = () => {
       if (currentPage < totalPage) {

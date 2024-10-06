@@ -90,10 +90,9 @@ export const ImagesRender = React.memo(({item}) => {
                     //     [index]: item[index].small.url,
                     //     }))
 
-
                     setImageSources((prevSources) => ({
                         ...prevSources,
-                        [index]: item[index].large.url
+                        [index]: item[index].large.url.split('?')[0]
                         }));       
                 }
             }

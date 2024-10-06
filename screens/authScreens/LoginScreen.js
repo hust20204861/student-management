@@ -12,6 +12,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async() => {
     const data = await Login({email:"parent_pp1@el-school.net", password:"123456"});
+    // const data = await Login({email, password});
     if(data.code == 200){
         navigation.replace("Main",{data: data.data.active_class_year_id});
         setErrorMessage(null);
