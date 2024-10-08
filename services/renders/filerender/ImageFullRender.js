@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Modal, TouchableWithoutFeedback, Dimensions, ScrollView, Image, Text } from "react-native";
 import ImageView from 'react-native-image-view';
-import styles from "../../styles/style"; 
+import styles from "../../../styles/style"; 
 
 const ImageFullRender = ({ item, isFullScreen, handleModalClose, currentImageIndex }) => {
     

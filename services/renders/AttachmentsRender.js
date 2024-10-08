@@ -1,13 +1,12 @@
-import { ImagesRender } from "./ImagesRender";
+import { ImagesRender } from "./filerender/ImagesRender";
 import { View } from "react-native";
-import { VideosRender } from "./VideosRender";
-import PdfsRender from "./PdfsRender";
-import DocumentsRender from "./DocumentsRender";
-import React, { useMemo, useEffect } from "react";
-import PowerPointsRender from "./PowerPointsRender";
-import ExcelsRender from "./ExcelsRender";
-import AudioesRender from "./AudioesRender";
-import RNFS from 'react-native-fs';
+import { VideosRender } from "./filerender/VideosRender";
+import PdfsRender from "./filerender/PdfsRender";
+import DocumentsRender from "./filerender/DocumentsRender";
+import React, { useMemo } from "react";
+import PowerPointsRender from "./filerender/PowerPointsRender";
+import ExcelsRender from "./filerender/ExcelsRender";
+import AudioesRender from "./filerender/AudioesRender";
 
 
 const AttachmentsRender = ({ items }) => {

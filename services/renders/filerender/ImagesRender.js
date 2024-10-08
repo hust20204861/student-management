@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, View, TouchableOpacity, ScrollView, Text, Modal, Dimensions, TouchableWithoutFeedback } from "react-native";
 import { useState, useEffect, useRef } from "react";
-import styles from "../../styles/style";
+import styles from "../../../styles/style";
 import ImageFullRender from "./ImageFullRender";
 import RNFS from 'react-native-fs'
 import * as Progress from 'react-native-progress';

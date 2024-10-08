@@ -1,13 +1,14 @@
 import { Alert, TouchableWithoutFeedback, View, Text, Modal, FlatList, TouchableOpacity, Dimensions  } from "react-native";
 import { useState, useEffect } from "react";
 import DataRenderer from "../../services/renders/ActionRender";
+import { getActions } from "../../api/fetchAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { PaginationData } from "../../services/renders/PaginationData";
 
 const PrivateActions = ({route}) => {
-  const [dataPrivate, setDataPrivate] = useState([])
+  const [dataPublic, setDataPublic] = useState([])
   const [search, setSearch] = useState('')
   const [inputShow, setInputShow] = useState(false)
   const id = route.params.data;
@@ -21,19 +22,19 @@ const PrivateActions = ({route}) => {
       try {
         const key = `data${url1}/${type}`;
         const response = await AsyncStorage.getItem(key); 
-        setDataPrivate(JSON.parse(response));
+        setDataPublic(JSON.parse(response));
       } catch (error) {
         console.log("Error fetching data from AsyncStorage:", error);
       }
     };
-
     fetchDataFromStorage();
   }, []); 
 
   const { data, loadingStates, refreshing, loadMore, fetchData } = PaginationData(url1, url, type, search);
+
   useEffect(() => {
     if (data.length > 0) {
-      setDataPrivate(data);
+      setDataPublic(data);
     }
   }, [data]); 
     const handleShow = () => {
@@ -68,8 +69,7 @@ const PrivateActions = ({route}) => {
       <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
       </TouchableWithoutFeedback>
       </View>}
-      <DataRenderer data = {dataPrivate} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
-
+      <DataRenderer data = {dataPublic} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} contentType={'contact'}/>
     </View>
   )
 }

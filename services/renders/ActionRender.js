@@ -1,58 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Dimensions, Modal } from 'react-native';
-import ImageLoading from '../loadings/ImageLoading';
-import styles from '../../styles/style';
-import AttachmentsRender from './AttachmentsRender';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, FlatList, TouchableOpacity, Dimensions, Modal, PanResponder, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { likeStatus } from '../../api/fetchAPI';
-import { PaginationData } from './PaginationData';
-
-const RenderItem = React.memo(({ item, loadingStates, handleGetUsersLike, contentType}) => {
-  const [colorLike, setColorLike] = useState('')
+import RenderUsersLike from './RenderUsersLike';
+import RenderItem from './RenderItem';
   
-  const handleLike = async(id) => {
-    const response = await likeStatus(id, contentType);
-    console.log(response)
-  }
-  useEffect(() => {
-    if(item.Liked == true){
-      setColorLike("red")
-    }else{
-      setColorLike("black");
-    }
-  },[])
-  return (
-    <View style={{ flex:1}}>
-      {loadingStates[item.Id] ? (
-        <View key={item.Id} style={{ marginBottom: 30 }}>
-          <ImageLoading />
-        </View>
-      ) : (
-        <View key={item.Id} style={styles.actionsContainer}>
-          <View style={{ paddingLeft: 15, paddingRight: 10 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 5, marginTop:15, color:'black' }}>
-              {item.Title}
-            </Text>
-            {item.Content && (<Text style={{ fontSize: 18, marginBottom: 5, color:'black' }}>{item.Content}</Text>)}
-          </View>
-          <AttachmentsRender items={item.Attachments} />
-          {item.TotalLike > 0 && <TouchableOpacity style={{ margin: 5, right:0,flexDirection:'row',}} onPress={handleGetUsersLike}>
-          <Text>{item.TotalLike}</Text>
-          <Icon name='heart' size={15} style={{ margin: 5, right:0, color:"red" }}/>  
-          </TouchableOpacity>}
-          
-          <View style={{flexDirection:'row',}}>
-          <TouchableOpacity onPress={() => handleLike(item.Id)} style={{ margin: 5, right:0,}}>
-          <Icon name='heart' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
-          </TouchableOpacity>
-          <Text style={{ margin: 10, color:'black', position:'absolute', right:0 }}>{item.ContactDate}</Text>
-          </View>
-        </View>
-      )}
-    </View>
-  );
-});
-
 const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, contentType }) => {
   const [isShowUsers, setIsShowUsers] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -64,36 +15,66 @@ const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, co
     setIsShowUsers(true);
   }
   const handleClose = () => {
-    setIsShowUsers(false)
-    setSelectedItem(null);
-  }
-
-  const RenderUsersLike = ({ item, url, url1, contentType }) => {
-    const { data: userData, loadMore } = PaginationData(url1, url, null, null, item.Id, contentType);
-    return (
-      <FlatList
-        data={userData}
-        renderItem={({ item: user }) => (
-          <TouchableOpacity style={{ width: Dimensions.get('window').width, padding:20 }}>
-            <Text style={{ color: 'black', fontSize: 16 }}>{user.FullName}</Text>
-            <View
-            style={{
-              width: '90%', 
-              borderBottomColor: 'gray',
-              borderBottomWidth: 1,
-              marginTop: 15, 
-              alignSelf: 'center', 
-            }}
-          />
-          </TouchableOpacity>
-        )}
-        keyExtractor={(user) => user.Id.toString()}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.7}
-       
-      />
-    );
+    Animated.timing(translateY, {
+      toValue: Dimensions.get('window').height,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsShowUsers(false);
+      setSelectedItem(null);
+    });
   };
+
+  const screenHeight = Dimensions.get('window').height;
+  const modalHeight = screenHeight * 0.6; 
+  const translateY = useRef(new Animated.Value(modalHeight)).current; // Ban đầu modal chiếm 40% chiều cao
+  const maxModalHeight = screenHeight * 0.15;
+  // PanResponder để xử lý cử chỉ kéo
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onPanResponderMove: (evt, gestureState) => {
+        // Khi kéo xuống (dy > 0), modal sẽ di chuyển theo
+        if (gestureState.dy > 0) {
+          translateY.setValue(modalHeight + gestureState.dy); // Di chuyển xuống theo cử chỉ
+        } else if (gestureState.dy < 0) {
+          // Khi kéo lên, modal không được kéo lên vượt quá giới hạn maxModalHeight (0)
+          translateY.setValue(Math.max(maxModalHeight, modalHeight + gestureState.dy));
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 150) {
+          // Nếu kéo xuống quá xa, modal đóng lại
+          Animated.timing(translateY, {
+            toValue: screenHeight,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setIsShowUsers(false));
+        } else if (gestureState.dy < -150) {
+          // Nếu kéo lên đủ xa, giữ modal ở trạng thái tối đa (top)
+          Animated.spring(translateY, {
+            toValue: maxModalHeight,
+            useNativeDriver: true,
+          }).start();
+        } else {
+          // Nếu kéo không đủ xa, đưa modal về vị trí cũ (40% chiều cao)
+          Animated.spring(translateY, {
+            toValue: modalHeight,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  useEffect(() => {
+    if (isShowUsers) {
+      Animated.spring(translateY, {
+        toValue: modalHeight,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isShowUsers]);
   
   return (
     <View style={{ backgroundColor:"#c7c8c9",}}>
@@ -109,14 +90,23 @@ const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, co
       <Modal visible={isShowUsers}
             transparent={true}
             onRequestClose={handleClose}>
-           <View style={{ position:"absolute", 
-                          height:"40%", 
-                          backgroundColor: 'white', 
-                          justifyContent: 'center', 
-                          alignItems: 'center', 
-                          bottom:0, 
-                          borderTopLeftRadius:10, 
-                          borderTopRightRadius:10}}>
+              {/* <TouchableWithoutFeedback onPress={handleClose}> */}
+           <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+           <Animated.View
+            style={{
+              position: 'absolute',
+              height: screenHeight,
+              width: '100%',
+              backgroundColor: 'white',
+              justifyContent: 'center',
+              alignItems: 'center',
+              bottom: 0,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              transform: [{ translateY }],
+            }}
+            {...panResponder.panHandlers}
+          >
             <TouchableOpacity onPress={handleClose} style={{  width: 0.9 * Dimensions.get('window').width, 
                                                               justifyContent:'center', 
                                                               alignItems:'center',
@@ -130,7 +120,9 @@ const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, co
               url1={url1}
               contentType={contentType}
             />
+             </Animated.View>
            </View>
+           {/* </TouchableWithoutFeedback> */}
       </Modal>
     </View>
   );

@@ -4,7 +4,6 @@ import DataRenderer from "../../services/renders/ActionRender";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { getActivities } from "../../api/fetchAPI";
 import { PaginationData } from "../../services/renders/PaginationData";
 
 const Activities = ({route}) => {
@@ -68,7 +67,7 @@ const Activities = ({route}) => {
       <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
       </TouchableWithoutFeedback>
       </View>}
-      <DataRenderer data = {dataActivities} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
+      <DataRenderer data = {dataActivities} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} contentType={'activity'}/>
     </View>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {  View, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import Video from 'react-native-video';
-import styles from '../../styles/style';
+import styles from '../../../styles/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export const VideosRender = ({item}) => {
