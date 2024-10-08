@@ -5,90 +5,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { getActivities } from "../../api/fetchAPI";
+import { PaginationData } from "../../services/renders/PaginationData";
 
 const Activities = ({route}) => {
-
-  const [data, setData] = useState([]);
-  const [loadingStates, setLoadingStates] = useState({});
-  const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(1);
+  
+  const [search, setSearch] = useState('')
   const [inputShow, setInputShow] = useState(false)
-  const [end, setEnd] = useState(false)
-  const [preData, setPreData] = useState([]);
   const id = route.params.data;
-  const type = 1;
 
-  const handleShow = () => {
-    setInputShow(!inputShow);
-  }
+  let url = `/api/school/v1/parent/activities/${id}`;
+  let url1 = `/api/school/v1/parent/activities/${id}`;
 
-  const fetchData = async () => {
-    setRefreshing(true);
-    try {
-      const getData = await AsyncStorage.getItem('activities');
-      if(getData){
-        setData(JSON.parse(getData))
-      }
-      const response = await getActivities(id, search, 1);
-      setTotalPage(response.data.last_page); 
-      setCurrentPage(response.data.current_page);
-      setData( response.data.data);
-    } catch (error) {
-      console.log("Failed to get data:", error);
-    } finally {
-      setRefreshing(false);
+  const { data, loadingStates, refreshing, loadMore, fetchData } = PaginationData(url1, url, null, search);
+  console.log(data)
+    const handleShow = () => {
+      setInputShow(!inputShow);
     }
-};
-
-  const nextData = async() => {
-    try{
-    const response = await getActions(id, search, currentPage + 1);
-    const pageData = response.data.data
-    setPreData(pageData)
-    const initLoadingState = {};
-    pageData.forEach(item => { initLoadingState[item.Id] = true });
-      setLoadingStates(initLoadingState);
-    pageData.forEach(item => {
-        setLoadingStates(prevLoadingStates => ({ ...prevLoadingStates, [item.Id]: false }));
-      });
-    } catch (error) {
-      console.log("Failed to get data:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  }
-    // useEffect(() => {
-    //   console.log("Loading public:", loadingStates);
-    // }, [loadingStates]);
-      useEffect(() => {
-        fetchData();
-      },[]);
-
-      useEffect(() => {
-        fetchData();
-        nextData()
-      },[search])
-      
-      useEffect(() => {
-        nextData();
-      }, [currentPage]);
-
-    const loadMore = () => {
-      if (currentPage < totalPage) {
-        setCurrentPage(prev => prev + 1)  
-        setData(prev => {
-          const allData = prev.concat(preData);
-          return allData
-        })
-      }
-      if (currentPage == totalPage){
-      setEnd(true);
-      }
-    };
-    console.log("page:",currentPage);
-    console.log("data:",data.length);
+    const handleRefresh = () => {
+      fetchData(); 
+  };
   return(
     <View style={{ flex: 1, }}>
       {inputShow && 
@@ -114,7 +49,7 @@ const Activities = ({route}) => {
       <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
       </TouchableWithoutFeedback>
       </View>}
-      <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={fetchData} loadMore={loadMore} />
+      <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
     </View>
   )
 }

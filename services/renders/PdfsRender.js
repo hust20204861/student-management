@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useDebugValue, useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Alert, Modal } from 'react-native';
 import Pdf from 'react-native-pdf'; 
 import { Dimensions } from 'react-native';
@@ -12,6 +12,7 @@ const PdfsRender = ({item}) => {
     const [loadDown, setLoadDown] = useState({})
     const [progress, setProgress] = useState({})
     const [isDownload, setIsDownload] = useState({})
+    const [progressOpen, setProgressOpen] = useState(0)
 
     useEffect(() => {
         const checkFiles = async () => {
@@ -35,6 +36,7 @@ const handleDownLoad = (filePath, fileName, index) => {
     try {
         setProgress((prevState) => ({ ...prevState, [index]: 0 })); 
         setIsDownload((prevState) => ({ ...prevState, [index]: true }))
+        console.log("start down")
         RNFS.downloadFile({
             fromUrl: filePath,
             toFile: localFilePath,
@@ -45,6 +47,7 @@ const handleDownLoad = (filePath, fileName, index) => {
         }).promise
         .then(response => {
             if (response.statusCode === 200) {
+                console.log("finish down")
                 setLoadDown((prevState) => ({ ...prevState, [index]: false }));  
                 setIsDownload((prevState) => ({ ...prevState, [index]: false }));  
             } else {
@@ -63,6 +66,7 @@ const handleDownLoad = (filePath, fileName, index) => {
     const closePdf = () => {
         setPdfVisible(false);
     };
+    console.log(progressOpen,"ggggg")
     return (
         <View style={styles.container}>
             {item.map((file, index) => (
@@ -87,6 +91,10 @@ const handleDownLoad = (filePath, fileName, index) => {
                     <Pdf
                         source={{uri: pdfPath}}
                         trustAllCerts={false}
+                        onLoadProgress={(percent) => {
+                          console.log('Progress:', percent);
+                          setProgressOpen(percent);
+                        }}
                         onLoadComplete={(numberOfPages) => {
                             console.log(`Number of pages: ${numberOfPages}`);
                         }}
@@ -99,6 +107,8 @@ const handleDownLoad = (filePath, fileName, index) => {
                         }}
                         style={styles.pdf}
                     />
+                    {progressOpen < 1 && 
+                    <Progress.Bar  progress={progressOpen} width={300} height={30}/>}
                     <Icon
                         name="arrow-left" 
                         size={24}

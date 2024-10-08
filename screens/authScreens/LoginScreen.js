@@ -22,7 +22,6 @@ const LoginScreen = ({ navigation }) => {
             setErrorMessage(data.errors);
         }else{
             Alert.alert(data.message);
-
         }
     }
   }
