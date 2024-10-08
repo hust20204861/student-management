@@ -12,7 +12,7 @@ const PdfsRender = ({item}) => {
     const [loadDown, setLoadDown] = useState({})
     const [progress, setProgress] = useState({})
     const [isDownload, setIsDownload] = useState({})
-    const [progressOpen, setProgressOpen] = useState(0)
+    const [progressOpen, setProgressOpen] = useState(false)
 
     useEffect(() => {
         const checkFiles = async () => {
@@ -26,18 +26,18 @@ const PdfsRender = ({item}) => {
         checkFiles();
     }, [item]);
 const handlePress = async ( fileName ) => {
-    const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
         setPdfPath(localFilePath);
         setPdfVisible(true);
-        
+        setProgressOpen(true); 
 };
-const handleDownLoad = (filePath, fileName, index) => {
+const handleDownLoad = async(filePath, fileName, index) => {
     const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
     try {
         setProgress((prevState) => ({ ...prevState, [index]: 0 })); 
         setIsDownload((prevState) => ({ ...prevState, [index]: true }))
         console.log("start down")
-        RNFS.downloadFile({
+        const response = await RNFS.downloadFile({
             fromUrl: filePath,
             toFile: localFilePath,
             progress: (res) => {
@@ -45,28 +45,20 @@ const handleDownLoad = (filePath, fileName, index) => {
                 setProgress((prevState) => ({ ...prevState, [index]: progressValue }));
             },
         }).promise
-        .then(response => {
-            if (response.statusCode === 200) {
-                console.log("finish down")
-                setLoadDown((prevState) => ({ ...prevState, [index]: false }));  
-                setIsDownload((prevState) => ({ ...prevState, [index]: false }));  
-            } else {
-                Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
-            }
-        })
-        .catch(error => {
-            console.error('Lỗi khi tải xuống file PDF:', error);
-            Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
-        });
+        if (response.statusCode === 200) {
+            console.log("finish down")
+            setLoadDown((prevState) => ({ ...prevState, [index]: false }));  
+            setIsDownload((prevState) => ({ ...prevState, [index]: false })); }
     } catch (error) {
         console.error('Lỗi khi tải xuống file PDF:', error);
         Alert.alert('Lỗi', 'Không thể tải xuống file PDF.');
     } 
 }
+
+
     const closePdf = () => {
         setPdfVisible(false);
     };
-    console.log(progressOpen,"ggggg")
     return (
         <View style={styles.container}>
             {item.map((file, index) => (
@@ -86,17 +78,23 @@ const handleDownLoad = (filePath, fileName, index) => {
              </View>
             ))}
             <Modal visible={isPdfVisible} onRequestClose={closePdf} animationType="slide">
-                <View style={{ flex: 1 }}>
-                
+                <View style={{ flex: 1, justifyContent:'center', alignItems:'center' }}>
+                {progressOpen && 
+                <View style={{ position: 'absolute',  zIndex: 1 }}>
+                    <Progress.CircleSnail
+                    size={100}
+                    color={[  'blue','green','red',]}
+                    indeterminate={true}
+                    thickness={6}
+                />
+                </View>
+                }
                     <Pdf
                         source={{uri: pdfPath}}
                         trustAllCerts={false}
-                        onLoadProgress={(percent) => {
-                          console.log('Progress:', percent);
-                          setProgressOpen(percent);
-                        }}
                         onLoadComplete={(numberOfPages) => {
                             console.log(`Number of pages: ${numberOfPages}`);
+                            setProgressOpen(false);
                         }}
                         onPageChanged={(page) => {
                             console.log(`Current page: ${page}`);
@@ -107,8 +105,7 @@ const handleDownLoad = (filePath, fileName, index) => {
                         }}
                         style={styles.pdf}
                     />
-                    {progressOpen < 1 && 
-                    <Progress.Bar  progress={progressOpen} width={300} height={30}/>}
+                    
                     <Icon
                         name="arrow-left" 
                         size={24}

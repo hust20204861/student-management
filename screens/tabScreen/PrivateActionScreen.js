@@ -1,14 +1,13 @@
 import { Alert, TouchableWithoutFeedback, View, Text, Modal, FlatList, TouchableOpacity, Dimensions  } from "react-native";
 import { useState, useEffect } from "react";
 import DataRenderer from "../../services/renders/ActionRender";
-import { getActions } from "../../api/fetchAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { getPagination } from "../../api/fetchAPI";
 import { PaginationData } from "../../services/renders/PaginationData";
 
 const PrivateActions = ({route}) => {
+  const [dataPrivate, setDataPrivate] = useState([])
   const [search, setSearch] = useState('')
   const [inputShow, setInputShow] = useState(false)
   const id = route.params.data;
@@ -17,7 +16,26 @@ const PrivateActions = ({route}) => {
   let url = `/api/school/v1/parent/contacts/${id}`;
   let url1 = `/api/school/v1/parent/contacts/${id}`;
 
+  useEffect(() => {
+    const fetchDataFromStorage = async () => {
+      try {
+        const key = `data${url1}/${type}`;
+        const response = await AsyncStorage.getItem(key); 
+        setDataPrivate(JSON.parse(response));
+      } catch (error) {
+        console.log("Error fetching data from AsyncStorage:", error);
+      }
+    };
+
+    fetchDataFromStorage();
+  }, []); 
+
   const { data, loadingStates, refreshing, loadMore, fetchData } = PaginationData(url1, url, type, search);
+  useEffect(() => {
+    if (data.length > 0) {
+      setDataPrivate(data);
+    }
+  }, [data]); 
     const handleShow = () => {
       setInputShow(!inputShow);
     }
@@ -50,7 +68,7 @@ const PrivateActions = ({route}) => {
       <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
       </TouchableWithoutFeedback>
       </View>}
-      <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
+      <DataRenderer data = {dataPrivate} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
 
     </View>
   )

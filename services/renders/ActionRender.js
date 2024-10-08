@@ -10,7 +10,7 @@ import { PaginationData } from './PaginationData';
 const RenderItem = React.memo(({ item, loadingStates, handleGetUsersLike, contentType}) => {
   const [colorLike, setColorLike] = useState('')
   
-  const handleLike = async(id, contentType) => {
+  const handleLike = async(id) => {
     const response = await likeStatus(id, contentType);
     console.log(response)
   }
@@ -42,7 +42,7 @@ const RenderItem = React.memo(({ item, loadingStates, handleGetUsersLike, conten
           </TouchableOpacity>}
           
           <View style={{flexDirection:'row',}}>
-          <TouchableOpacity onPress={() => handleLike(item.Id, 'contact')} style={{ margin: 5, right:0,}}>
+          <TouchableOpacity onPress={() => handleLike(item.Id)} style={{ margin: 5, right:0,}}>
           <Icon name='heart' size={24} style={{ margin: 5, right:0, color:colorLike }}/>  
           </TouchableOpacity>
           <Text style={{ margin: 10, color:'black', position:'absolute', right:0 }}>{item.ContactDate}</Text>
@@ -55,37 +55,46 @@ const RenderItem = React.memo(({ item, loadingStates, handleGetUsersLike, conten
 
 const DataRenderer = ({ data, loadingStates, refreshing, onRefresh, loadMore, contentType }) => {
   const [isShowUsers, setIsShowUsers] = useState(false);
-  const [user, setUser] = useState([]);
-  const [loadMoreUsers, setLoadMoreUser] = useState(null);
-
-  let url = `/api/school/v1/parent/interaction/liked-users`;
-  let url1 = `/api/school/v1/parent/interaction/liked-users`;
+  const [selectedItem, setSelectedItem] = useState(null);
+  let url = '/api/school/v1/parent/interaction/liked-users';
+  let url1 = '/api/school/v1/parent/interaction/liked-users';
 
   const handleGetUsersLike = async(item) => {
-    try{
-      const { data, loadingStates, refreshing, loadMore, end, fetchData } =  PaginationData(url1, url, null, null, item.Id, contentType);
-      setIsShowUsers(true);
-      setUser(data);
-      setLoadMoreUser(loadMore)
-    }catch(error){
-      console.log("Error:", error)
-    }
+    setSelectedItem(item);
+    setIsShowUsers(true);
   }
-
   const handleClose = () => {
     setIsShowUsers(false)
+    setSelectedItem(null);
   }
 
-const RenderUsersLike = ({data}) => {
-  return(
-    <View style={{width:Dimensions.get('window').width, height: 30, borderBottomColor:'white', borderWidth:1}}>
-    <TouchableOpacity>
-      <Text style={{color:'white',}}>{data.FullName}</Text>
-    </TouchableOpacity>
-    </View>
-  )
-}
-
+  const RenderUsersLike = ({ item, url, url1, contentType }) => {
+    const { data: userData, loadMore } = PaginationData(url1, url, null, null, item.Id, contentType);
+    return (
+      <FlatList
+        data={userData}
+        renderItem={({ item: user }) => (
+          <TouchableOpacity style={{ width: Dimensions.get('window').width, padding:20 }}>
+            <Text style={{ color: 'black', fontSize: 16 }}>{user.FullName}</Text>
+            <View
+            style={{
+              width: '90%', 
+              borderBottomColor: 'gray',
+              borderBottomWidth: 1,
+              marginTop: 15, 
+              alignSelf: 'center', 
+            }}
+          />
+          </TouchableOpacity>
+        )}
+        keyExtractor={(user) => user.Id.toString()}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.7}
+       
+      />
+    );
+  };
+  
   return (
     <View style={{ backgroundColor:"#c7c8c9",}}>
       <FlatList
@@ -100,16 +109,27 @@ const RenderUsersLike = ({data}) => {
       <Modal visible={isShowUsers}
             transparent={true}
             onRequestClose={handleClose}>
-           <View style={styles.modalContainer}>
-            <TouchableOpacity onPress={handleClose}>
-            <Icon name="remove" size={30} style={{color:'white', left:0}}/> 
+           <View style={{ position:"absolute", 
+                          height:"40%", 
+                          backgroundColor: 'white', 
+                          justifyContent: 'center', 
+                          alignItems: 'center', 
+                          bottom:0, 
+                          borderTopLeftRadius:10, 
+                          borderTopRightRadius:10}}>
+            <TouchableOpacity onPress={handleClose} style={{  width: 0.9 * Dimensions.get('window').width, 
+                                                              justifyContent:'center', 
+                                                              alignItems:'center',
+                                                              borderBottomWidth:1, 
+                                                              borderBottomColor:'gray'}}>
+            <Icon name="minus" size={40} style={{color:'black'}}/> 
             </TouchableOpacity>
-             <FlatList data={user}
-                      renderItem={({item}) => <RenderUsersLike data={item}/>}
-                      keyExtractor={(user) => user.Id.toString()}
-                      onEndReached={loadMoreUsers}
-                      onEndReachedThreshold={0.5}
-                      />
+            <RenderUsersLike
+              item={selectedItem}
+              url={url}
+              url1={url1}
+              contentType={contentType}
+            />
            </View>
       </Modal>
     </View>

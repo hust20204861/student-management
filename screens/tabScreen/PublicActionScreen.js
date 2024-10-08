@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { PaginationData } from "../../services/renders/PaginationData";
 
 const PublicActions = ({route}) => {
-
+  const [dataPublic, setDataPublic] = useState([])
   const [search, setSearch] = useState('')
   const [inputShow, setInputShow] = useState(false)
   const id = route.params.data;
@@ -17,7 +17,26 @@ const PublicActions = ({route}) => {
   let url = `/api/school/v1/parent/contacts/${id}`;
   let url1 = `/api/school/v1/parent/contacts/${id}`;
 
+  useEffect(() => {
+    const fetchDataFromStorage = async () => {
+      try {
+        const key = `data${url1}/${type}`;
+        const response = await AsyncStorage.getItem(key); 
+        setDataPublic(JSON.parse(response));
+      } catch (error) {
+        console.log("Error fetching data from AsyncStorage:", error);
+      }
+    };
+    fetchDataFromStorage();
+  }, []); 
+
   const { data, loadingStates, refreshing, loadMore, fetchData } = PaginationData(url1, url, type, search);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      setDataPublic(data);
+    }
+  }, [data]); 
     const handleShow = () => {
       setInputShow(!inputShow);
     }
@@ -50,7 +69,7 @@ const PublicActions = ({route}) => {
       <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
       </TouchableWithoutFeedback>
       </View>}
-      <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} contentType={'contact'}/>
+      <DataRenderer data = {dataPublic} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} contentType={'contact'}/>
     </View>
   )
 }

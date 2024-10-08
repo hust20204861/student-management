@@ -1,7 +1,8 @@
 import { getPagination } from "../../api/fetchAPI";
 import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const PaginationData = (url1, url, type, search, contentId, contentType) => {
+export const PaginationData = (url1, url, type, search, contentId, contentType ) => {
     const [data, setData] = useState([]);
     const [loadingStates, setLoadingStates] = useState({});
     const [refreshing, setRefreshing] = useState(false);
@@ -12,10 +13,11 @@ export const PaginationData = (url1, url, type, search, contentId, contentType) 
 
   const params = new URLSearchParams();
   const params1 = new URLSearchParams();
-  
+  let key = `data${url1}`;
   if (type) {
     params.append('type', type); 
     params1.append('type', type); 
+    key += `/${type}`;
   }
   if (search) {
     params.append('search', search);
@@ -40,12 +42,11 @@ export const PaginationData = (url1, url, type, search, contentId, contentType) 
   if (params1.toString()) {
     url1 += `?${params1.toString()}`; 
   }
-  console.log(url1, url,"hhhhhhh")
-  
     const fetchData = async () => {
       setRefreshing(true);
       try {
         const response = await getPagination(url1);
+        await AsyncStorage.setItem(key, JSON.stringify(response.data.data));
         setTotalPage(response.data.last_page); 
         setCurrentPage(response.data.current_page);
         setData( response.data.data);
@@ -80,6 +81,7 @@ export const PaginationData = (url1, url, type, search, contentId, contentType) 
         useEffect(() => {
           nextData();
         }, [currentPage]);
+
       const loadMore = () => {
         if (currentPage < totalPage) {
           setCurrentPage(prev => prev + 1)  

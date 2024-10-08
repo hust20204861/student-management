@@ -8,7 +8,7 @@ import { getActivities } from "../../api/fetchAPI";
 import { PaginationData } from "../../services/renders/PaginationData";
 
 const Activities = ({route}) => {
-  
+  const [dataActivities, setDataActivities] = useState([])
   const [search, setSearch] = useState('')
   const [inputShow, setInputShow] = useState(false)
   const id = route.params.data;
@@ -16,8 +16,27 @@ const Activities = ({route}) => {
   let url = `/api/school/v1/parent/activities/${id}`;
   let url1 = `/api/school/v1/parent/activities/${id}`;
 
+  useEffect(() => {
+    const fetchDataFromStorage = async () => {
+      try {
+        const key = `data${url1}`;
+        const response = await AsyncStorage.getItem(key); 
+        setDataActivities(JSON.parse(response));
+      } catch (error) {
+        console.log("Error fetching data from AsyncStorage:", error);
+      }
+    };
+
+    fetchDataFromStorage();
+  }, []); 
+
   const { data, loadingStates, refreshing, loadMore, fetchData } = PaginationData(url1, url, null, search);
-  console.log(data)
+
+  useEffect(() => {
+    if (data.length > 0) {
+      setDataActivities(data);
+    }
+  }, [data]); 
     const handleShow = () => {
       setInputShow(!inputShow);
     }
@@ -49,7 +68,7 @@ const Activities = ({route}) => {
       <Icon name='search' size={24} style={{ paddingTop: 8, paddingBottom: 8, paddingLeft: 20, paddingRight: 20, backgroundColor:'white'}}/>
       </TouchableWithoutFeedback>
       </View>}
-      <DataRenderer data = {data} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
+      <DataRenderer data = {dataActivities} loadingStates={loadingStates} refreshing={refreshing} onRefresh={handleRefresh} loadMore={loadMore} />
     </View>
   )
 }
